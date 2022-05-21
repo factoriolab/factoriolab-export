@@ -4,7 +4,7 @@ local event = require("__flib__.event")
 require("json")
 require("utils")
 
-local folder = "lab-export/"
+local folder = "factorio-lab-export/"
 local player
 local player_settings
 local dictionaries
@@ -116,7 +116,7 @@ local function get_fuel_category(entity)
       category = fuel_category
     else
       -- TODO: Allow array of fuel types in data?
-      player.print({"lab-export.warn-multiple-fuel-categories", entity.name})
+      player.print({"factorio-lab-export.warn-multiple-fuel-categories", entity.name})
       break
     end
   end
@@ -266,7 +266,7 @@ local function get_row(item)
 end
 
 local function export_data(e)
-  player.print({"lab-export.initialize"})
+  player.print({"factorio-lab-export.initialize"})
 
   -- Localized names
   local group_names = dictionaries["item_group_names"]
@@ -536,7 +536,7 @@ local function export_data(e)
         table.insert(lab_items, lab_item)
         table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = 2})
       else
-        player.print({"lab-export.warn-no-item-prototype", item.name})
+        player.print({"factorio-lab-export.warn-no-item-prototype", item.name})
       end
     end
   end
@@ -615,7 +615,7 @@ local function export_data(e)
           }
           table.insert(lab_recipes, lab_recipe)
         else
-          player.print({"lab-export.warn-skipping-burn", name})
+          player.print({"factorio-lab-export.warn-skipping-burn", name})
         end
       end
     end
@@ -688,7 +688,7 @@ local function export_data(e)
             table.insert(lab_recipes, lab_recipe)
           end
         else
-          player.print({"lab-export.warn-skipping-boiler", name})
+          player.print({"factorio-lab-export.warn-skipping-boiler", name})
         end
       end
     end
@@ -748,7 +748,7 @@ local function export_data(e)
   end
 
   game.remove_path(folder)
-  local pretty_json = player_settings["lab-export-pretty-json"].value
+  local pretty_json = player_settings["factorio-lab-export-pretty-json"].value
 
   if language ~= "en" then
     -- Build I18n data ONLY for non-English
@@ -759,7 +759,7 @@ local function export_data(e)
     }
 
     game.write_file(folder .. "i18n/" .. language .. ".json", json.stringify(lab_i18n, pretty_json))
-    player.print({"lab-export.complete-i18n", language})
+    player.print({"factorio-lab-export.complete-i18n", language})
     return
   end
 
@@ -869,7 +869,7 @@ local function export_data(e)
 
   game.write_file(folder .. "data.json", json.stringify(lab_data, pretty_json))
   game.write_file(folder .. "hash.json", json.stringify(lab_hash, pretty_json))
-  player.print({"lab-export.complete-data"})
+  player.print({"factorio-lab-export.complete-data"})
 end
 
 local function create_dictionaries()
@@ -895,7 +895,7 @@ event.on_player_created(
   function(e)
     player = game.players[e.player_index]
     player_settings = settings.get_player_settings(player)
-    if player_settings["lab-export-disable"].value then
+    if player_settings["factorio-lab-export-disable"].value then
       log("skipping data export")
       return
     end

@@ -1,10 +1,10 @@
 {
-  "name": "lab-export",
+  "name": "factorio-lab-export",
   "version": "1.0.0",
   "title": "FactorioLab Export",
   "author": "ilbJanissary",
-  "contact": "https://github.com/factoriolab/lab-export",
-  "homepage": "https://github.com/factoriolab/lab-export",
+  "contact": "https://github.com/factoriolab/factorio-lab-export",
+  "homepage": "https://github.com/factoriolab/factorio-lab-export",
   "description": "Logs game data to a json file that can be used by FactorioLab (https://factoriolab.github.io).",
   "factorio_version": "1.1",
   "dependencies": ["base >= 1.1.59", "flib >= 0.10.1"]
