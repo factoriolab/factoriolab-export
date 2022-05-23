@@ -45,10 +45,12 @@ function utils.convert_energy(energy)
 end
 
 -- Convert a list to a table by id/name
-local function to_table(array)
+function utils.to_table(array)
   local table = {}
   for _, obj in pairs(array) do
     table[obj.id] = obj.name
   end
   return table
 end
+
+return utils

@@ -80,3 +80,5 @@ function json.stringify(obj, pretty, tabvalue, as_key)
   end
   return table.concat(s)
 end
+
+return json
