@@ -3,7 +3,7 @@ local entity_utils = require("entity-utils")
 local json = require("json")
 local utils = require("utils")
 
-local folder = "factorio-lab-export/"
+local folder = "factoriolab-export/"
 
 local function check_recipe_name(recipes, desired_id, backup_id, copied_icons)
   for _, recipe in pairs(recipes) do
@@ -64,18 +64,20 @@ local function compare_default_max(default, name, desired_trait, desired_value)
 end
 
 -- Calculate row for an item, this keeps track of last item parsed
-local last_row = 0, last_group, last_subgroup
+local last_row, last_col, last_group, last_subgroup = 0, 0
 local function get_row(item)
   if item.group == last_group then
-    if item.subgroup == last_subgroup then
-    else
+    if item.subgroup ~= last_subgroup or last_col == 10 then
       last_row = last_row + 1
+      last_col = 0
     end
   else
     last_row = 0
+    last_col = 0
   end
   last_group = item.group
   last_subgroup = item.subgroup
+  last_col = last_col + 1
   return last_row
 end
 
@@ -85,7 +87,7 @@ return function(player_index, language_data)
   local dictionaries = language_data.dictionaries
   local language = language_data.language
 
-  player.print({"factorio-lab-export.initialize"})
+  player.print({"factoriolab-export.initialize"})
 
   -- Localized names
   local group_names = dictionaries["item_group_names"]
@@ -321,7 +323,7 @@ return function(player_index, language_data)
         table.insert(lab_items, lab_item)
         table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = 2})
       else
-        player.print({"factorio-lab-export.warn-no-item-prototype", item.name})
+        player.print({"factoriolab-export.warn-no-item-prototype", item.name})
       end
     end
   end
@@ -400,7 +402,7 @@ return function(player_index, language_data)
           }
           table.insert(lab_recipes, lab_recipe)
         else
-          player.print({"factorio-lab-export.warn-skipping-burn", name})
+          player.print({"factoriolab-export.warn-skipping-burn", name})
         end
       end
     end
@@ -473,7 +475,7 @@ return function(player_index, language_data)
             table.insert(lab_recipes, lab_recipe)
           end
         else
-          player.print({"factorio-lab-export.warn-skipping-boiler", name})
+          player.print({"factoriolab-export.warn-skipping-boiler", name})
         end
       end
     end
@@ -497,7 +499,7 @@ return function(player_index, language_data)
     name = gui_names["research"]
   }
   table.insert(lab_categories, lab_category)
-  table.insert(scaled_icons, {name = "infinite-research", sprite = "technology/space-science-pack", scale = 0.25})
+  table.insert(scaled_icons, {name = "research", sprite = "technology/space-science-pack", scale = 0.25})
   local tech_col = 0
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
@@ -533,7 +535,7 @@ return function(player_index, language_data)
   end
 
   game.remove_path(folder)
-  local pretty_json = player_settings["factorio-lab-export-pretty-json"].value
+  local pretty_json = player_settings["factoriolab-export-pretty-json"].value
 
   if language ~= "en" then
     -- Build I18n data ONLY for non-English
@@ -544,7 +546,7 @@ return function(player_index, language_data)
     }
 
     game.write_file(folder .. "i18n/" .. language .. ".json", json.stringify(lab_i18n, pretty_json))
-    player.print({"factorio-lab-export.complete-i18n", language})
+    player.print({"factoriolab-export.complete-i18n", language})
     return
   end
 
@@ -567,7 +569,7 @@ return function(player_index, language_data)
     )
     local lab_icon = {
       id = icon.name,
-      color = "#000000", -- TODO: Find some way to determine average color? Or use external tool?
+      color = "#000000",
       position = string.format("%spx %spx", x > 0 and (x / 2) * -64 or 0, y > 0 and (y / 2) * -64 or 0)
     }
     table.insert(lab_icons, lab_icon)
@@ -654,5 +656,5 @@ return function(player_index, language_data)
 
   game.write_file(folder .. "data.json", json.stringify(lab_data, pretty_json))
   game.write_file(folder .. "hash.json", json.stringify(lab_hash, pretty_json))
-  player.print({"factorio-lab-export.complete-data"})
+  player.print({"factoriolab-export.complete-data"})
 end

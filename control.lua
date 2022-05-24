@@ -26,7 +26,7 @@ event.on_player_created(
   function(e)
     local player = game.players[e.player_index]
     local player_settings = settings.get_player_settings(player)
-    if player_settings["factorio-lab-export-disable"].value then
+    if player_settings["factoriolab-export-disable"].value then
       log("skipping data export")
       return
     end

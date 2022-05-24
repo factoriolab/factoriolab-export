@@ -16,7 +16,7 @@ local function get_fuel_category(entity, player)
       category = fuel_category
     else
       -- TODO: Allow array of fuel types in data?
-      player.print({"factorio-lab-export.warn-multiple-fuel-categories", entity.name})
+      player.print({"factoriolab-export.warn-multiple-fuel-categories", entity.name})
       break
     end
   end
