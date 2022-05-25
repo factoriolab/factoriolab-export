@@ -81,6 +81,24 @@ local function get_row(item)
   return last_row
 end
 
+local function safe_add(name, list)
+  for _, n in pairs(list) do
+    if n == name then
+      return
+    end
+  end
+  table.insert(list, name)
+end
+
+local function safe_add_recipe_items(recipe, list)
+  for n, _ in pairs(recipe["in"]) do
+    safe_add(n, list)
+  end
+  for n, _ in pairs(recipe.out) do
+    safe_add(n, list)
+  end
+end
+
 return function(player_index, language_data)
   local player = game.players[player_index]
   local player_settings = settings.get_player_settings(player)
@@ -321,6 +339,7 @@ return function(player_index, language_data)
           category = fluid.group.name
         }
         table.insert(lab_items, lab_item)
+        table.insert(lab_hash_items, name)
         table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = 2})
       else
         player.print({"factoriolab-export.warn-no-item-prototype", item.name})
@@ -376,6 +395,8 @@ return function(player_index, language_data)
             producers = {silo.name}
           }
           table.insert(lab_recipes, lab_recipe)
+          table.insert(lab_hash_recipes, id)
+          safe_add_recipe_items(lab_recipe, lab_hash_items)
         end
       end
       -- Check for burn recipe
@@ -401,6 +422,8 @@ return function(player_index, language_data)
             producers = burn_producers
           }
           table.insert(lab_recipes, lab_recipe)
+          table.insert(lab_hash_recipes, id)
+          safe_add_recipe_items(lab_recipe, lab_hash_items)
         else
           player.print({"factoriolab-export.warn-skipping-burn", name})
         end
@@ -413,7 +436,7 @@ return function(player_index, language_data)
         local desired_id = name
         local backup_id = name .. "-mining"
         local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
-        local lab_in
+        local lab_in = {}
         if entity.mineable_properties.required_fluid then
           local amount = entity.mineable_properties.fluid_amount / 10
           lab_in = {[entity.mineable_properties.required_fluid] = amount}
@@ -434,6 +457,8 @@ return function(player_index, language_data)
           table.insert(lab_limitations[limitation], id)
         end
         table.insert(lab_recipes, lab_recipe)
+        table.insert(lab_hash_recipes, id)
+        safe_add_recipe_items(lab_recipe, lab_hash_items)
       end
       -- Check for pump recipe
       if entity.type == "offshore-pump" then
@@ -444,11 +469,14 @@ return function(player_index, language_data)
           id = id,
           name = item_names[name] .. " : " .. fluid_names[entity.fluid.name],
           time = 1,
+          ["in"] = {},
           out = {[entity.fluid.name] = 1},
           producers = {name},
           cost = 100
         }
         table.insert(lab_recipes, lab_recipe)
+        table.insert(lab_hash_recipes, id)
+        safe_add_recipe_items(lab_recipe, lab_hash_items)
       end
       -- Check for boiler recipe
       if entity.type == "boiler" then
@@ -473,6 +501,8 @@ return function(player_index, language_data)
               producers = {name}
             }
             table.insert(lab_recipes, lab_recipe)
+            table.insert(lab_hash_recipes, id)
+            safe_add_recipe_items(lab_recipe, lab_hash_items)
           end
         else
           player.print({"factoriolab-export.warn-skipping-boiler", name})
@@ -526,6 +556,8 @@ return function(player_index, language_data)
         producers = tech_producers
       }
       table.insert(lab_recipes, lab_recipe)
+      table.insert(lab_hash_recipes, name)
+      safe_add_recipe_items(lab_recipe, lab_hash_items)
       tech_col = tech_col + 1
       if tech_col == 10 then
         tech_row = tech_row + 1
@@ -611,7 +643,15 @@ return function(player_index, language_data)
     }
   )
 
+  local version = {}
+  for name, ver in pairs(game.active_mods) do
+    if name ~= "factoriolab-export" and name ~= "flib" then
+      version[name] = ver
+    end
+  end
+
   lab_data = {
+    version = version,
     categories = lab_categories,
     icons = lab_icons,
     items = lab_items,
