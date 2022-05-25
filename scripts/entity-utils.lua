@@ -86,20 +86,29 @@ function entity_utils.launch_ticks(entity)
   return ticks
 end
 
-function entity_utils.process_producers(entity, producers)
-  local producer_categories
-
-  if entity.type == "mining-drill" then
-    producer_categories = entity.resource_categories
-  else
-    producer_categories = entity.crafting_categories
-  end
-
-  for category, _ in pairs(producer_categories) do
+local function add_producers(name, categories, producers)
+  for category, _ in pairs(categories) do
     if not producers[category] then
       producers[category] = {}
     end
-    table.insert(producers[category], entity.name)
+    table.insert(producers[category], name)
+  end
+end
+
+function entity_utils.process_producers(entity, producers)
+  if entity.resource_categories then
+    add_producers(entity.name, entity.resource_categories, producers.resource)
+  end
+  if entity.crafting_categories then
+    add_producers(entity.name, entity.crafting_categories, producers.crafting)
+  end
+  if entity.burner_prototype and entity.burner_prototype.fuel_categories then
+    add_producers(entity.name, entity.burner_prototype.fuel_categories, producers.burner)
+  end
+  if entity.type == "lab" then
+    table.insert(producers.labs, entity.name)
+  elseif entity.type == "silo" then
+    table.insert(producers.silos, entity)
   end
 end
 

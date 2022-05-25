@@ -20,10 +20,8 @@ local function process_recipes(recipes_unlocked)
   for name, recipe in pairs(game.recipe_prototypes) do
     local include = true
 
-    -- Skip recipes that cause unnecessary circular loops
-    -- [Vanilla] Ignore barrel emptying recipes
-    local empty = string.find(name, "^empty%-.+%-barrel$")
-    if empty then
+    -- Skip recipes that don't have outputs
+    if not recipe.products or not (#recipe.products > 0) then
       include = false
     end
 
