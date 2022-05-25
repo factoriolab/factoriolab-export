@@ -23,10 +23,6 @@ local function get_fuel_category(entity, player)
   return category
 end
 
-function entity_utils.get_stored_size(entity)
-  return tonumber(string.match(entity.order, ".-|(%d+)"))
-end
-
 function entity_utils.get_powered_entity(entity)
   local energy_type = nil
   local fuel_category = nil

@@ -518,8 +518,7 @@ return function(player_index, language_data)
       id = name,
       name = group_names[name]
     }
-    local size = entity_utils.get_stored_size(group)
-    local scale = 64 / size
+    local scale = utils.get_scaled_size(group) or 0.25
     table.insert(lab_categories, lab_category)
     table.insert(scaled_icons, {name = name, sprite = "item-group/" .. name, scale = scale})
   end
@@ -535,7 +534,8 @@ return function(player_index, language_data)
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
     if tech.research_unit_count_formula then
-      table.insert(scaled_icons, {name = name, sprite = "technology/" .. name, scale = 0.25})
+      local scale = utils.get_scaled_size(tech) or 0.25
+      table.insert(scaled_icons, {name = name, sprite = "technology/" .. name, scale = scale})
       local lab_item = {
         id = name,
         name = technology_names[name],

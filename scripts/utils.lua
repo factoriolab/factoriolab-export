@@ -53,4 +53,12 @@ function utils.to_table(array)
   return table
 end
 
+function utils.get_scaled_size(proto)
+  local size = tonumber(string.match(proto.order, ".-|(%d+)"))
+  if not size then
+    return nil
+  end
+  return 64 / size
+end
+
 return utils
