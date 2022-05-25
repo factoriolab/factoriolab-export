@@ -30,6 +30,7 @@ event.on_player_created(
       log("skipping data export")
       return
     end
+    player.print({"factoriolab-export.initialize"})
     dictionary.translate(player)
   end
 )

@@ -4,6 +4,8 @@ local json = require("json")
 local utils = require("utils")
 
 local folder = "factoriolab-export/"
+local color_warn = {r = 1, g = 0.5, b = 0}
+local color_good = {r = 0, g = 1, b = 0}
 
 local function check_recipe_name(recipes, desired_id, backup_id, copied_icons)
   for _, recipe in pairs(recipes) do
@@ -104,8 +106,6 @@ return function(player_index, language_data)
   local player_settings = settings.get_player_settings(player)
   local dictionaries = language_data.dictionaries
   local language = language_data.language
-
-  player.print({"factoriolab-export.initialize"})
 
   -- Localized names
   local group_names = dictionaries["item_group_names"]
@@ -342,7 +342,7 @@ return function(player_index, language_data)
         table.insert(lab_hash_items, name)
         table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = 2})
       else
-        player.print({"factoriolab-export.warn-no-item-prototype", item.name})
+        player.print({"factoriolab-export.warn-no-item-prototype", item.name}, color_warn)
       end
     end
   end
@@ -402,8 +402,9 @@ return function(player_index, language_data)
       -- Check for burn recipe
       if item.burnt_result then
         local burn_producers = {}
-        for _, producer in pairs(game.entity_prototypes) do
-          if producer.burner_prototype then
+        for _, n in pairs(sorted_item_names) do
+          local producer = game.entity_prototypes[n]
+          if producer and producer.burner_prototype then
             if producer.burner_prototype.fuel_categories[item.fuel_category] then
               table.insert(burn_producers, producer.name)
             end
@@ -425,7 +426,7 @@ return function(player_index, language_data)
           table.insert(lab_hash_recipes, id)
           safe_add_recipe_items(lab_recipe, lab_hash_items)
         else
-          player.print({"factoriolab-export.warn-skipping-burn", name})
+          player.print({"factoriolab-export.warn-skipping-burn", name}, color_warn)
         end
       end
     end
@@ -505,7 +506,7 @@ return function(player_index, language_data)
             safe_add_recipe_items(lab_recipe, lab_hash_items)
           end
         else
-          player.print({"factoriolab-export.warn-skipping-boiler", name})
+          player.print({"factoriolab-export.warn-skipping-boiler", name}, color_warn)
         end
       end
     end
@@ -566,6 +567,17 @@ return function(player_index, language_data)
     end
   end
 
+  local filtered_recipes = {}
+  -- Check recipes have producers
+  for _, recipe in pairs(lab_recipes) do
+    if recipe.producers and #recipe.producers then
+      table.insert(filtered_recipes, recipe)
+    else
+      player.print({"factoriolab-export.warn-skipping-no-producer", recipe.id}, color_warn)
+    end
+  end
+  lab_recipes = filtered_recipes
+
   game.remove_path(folder)
   local pretty_json = player_settings["factoriolab-export-pretty-json"].value
 
@@ -578,7 +590,7 @@ return function(player_index, language_data)
     }
 
     game.write_file(folder .. "i18n/" .. language .. ".json", json.stringify(lab_i18n, pretty_json))
-    player.print({"factoriolab-export.complete-i18n", language})
+    player.print({"factoriolab-export.complete-i18n", language}, color_good)
     return
   end
 
@@ -607,8 +619,12 @@ return function(player_index, language_data)
     table.insert(lab_icons, lab_icon)
     if copied_icons[icon.name] then
       for _, copy in pairs(copied_icons[icon.name]) do
-        lab_icon.id = copy
-        table.insert(lab_icons, lab_icon)
+        local lab_icon_copy = {
+          id = copy,
+          color = "#000000",
+          position = lab_icon.position
+        }
+        table.insert(lab_icons, lab_icon_copy)
       end
     end
     x = x + 2
@@ -696,5 +712,5 @@ return function(player_index, language_data)
 
   game.write_file(folder .. "data.json", json.stringify(lab_data, pretty_json))
   game.write_file(folder .. "hash.json", json.stringify(lab_hash, pretty_json))
-  player.print({"factoriolab-export.complete-data"})
+  player.print({"factoriolab-export.complete-data"}, color_good)
 end
