@@ -351,7 +351,8 @@ return function(player_index, language_data)
 
       table.insert(lab_items, lab_item)
       table.insert(lab_hash_items, name)
-      table.insert(scaled_icons, {name = name, sprite = "item/" .. name, scale = 2})
+      local scale = utils.get_scaled_size(item) or 2
+      table.insert(scaled_icons, {name = name, sprite = "item/" .. name, scale = scale})
     else
       local fluid = game.fluid_prototypes[name]
       if fluid then
@@ -365,7 +366,8 @@ return function(player_index, language_data)
         }
         table.insert(lab_items, lab_item)
         table.insert(lab_hash_items, name)
-        table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = 2})
+        local scale = utils.get_scaled_size(fluid) or 2
+        table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = scale})
       else
         player.print({"factoriolab-export.warn-no-item-prototype", item.name}, color_warn)
       end
@@ -388,7 +390,8 @@ return function(player_index, language_data)
     table.insert(lab_hash_recipes, name)
     if game.item_prototypes[name] == nil and game.fluid_prototypes[name] == nil then
       -- TODO: Detect if this recipe icon differs from item / fluid icon and then use it instead
-      table.insert(scaled_icons, {name = name, sprite = "recipe/" .. name, scale = 2})
+      local scale = utils.get_scaled_size(recipe) or 2
+      table.insert(scaled_icons, {name = name, sprite = "recipe/" .. name, scale = scale})
     end
   end
 
@@ -530,8 +533,8 @@ return function(player_index, language_data)
       id = name,
       name = group_names[name]
     }
-    local scale = utils.get_scaled_size(group)
 
+    local scale = utils.get_scaled_size(group)
     table.insert(lab_categories, lab_category)
     table.insert(scaled_icons, {name = name, sprite = "item-group/" .. name, scale = scale})
   end
