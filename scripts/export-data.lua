@@ -7,13 +7,25 @@ local folder = "factoriolab-export/"
 local color_warn = {r = 1, g = 0.5, b = 0}
 local color_good = {r = 0, g = 1, b = 0}
 
-local function check_recipe_name(recipes, desired_id, backup_id, copied_icons)
+local function add_icon(hash_id, name, scale, sprite, icons, player)
+  for _, icon in pairs(icons) do
+    if icon.hash_id and icon.hash_id == hash_id then
+      table.insert(icon.copies, name)
+      return
+    end
+  end
+  table.insert(icons, {hash_id = hash_id, name = name, scale = scale, sprite = sprite, copies = {}})
+end
+
+local function check_recipe_name(recipes, desired_id, backup_id, icons)
   for _, recipe in pairs(recipes) do
     if recipe.id == desired_id then
-      if not copied_icons[desired_id] then
-        copied_icons[desired_id] = {}
+      for _, icon in pairs(icons) do
+        if icon.name == recipe.id then
+          table.insert(icon.copies, backup_id)
+          break
+        end
       end
-      table.insert(copied_icons[desired_id], backup_id)
       return backup_id
     end
   end
@@ -130,8 +142,7 @@ return function(player_index, language_data)
   }
   local limitations_cache = {}
   local groups_used = {}
-  local scaled_icons = {}
-  local copied_icons = {}
+  local icons = {}
 
   -- Defaults
   local lab_default_beacon
@@ -351,8 +362,8 @@ return function(player_index, language_data)
 
       table.insert(lab_items, lab_item)
       table.insert(lab_hash_items, name)
-      local scale = utils.get_scaled_size(item) or 2
-      table.insert(scaled_icons, {name = name, sprite = "item/" .. name, scale = scale})
+      local hash_id, scale = utils.get_order_info("item/" .. name, player)
+      add_icon(hash_id, name, scale or 2, "item/" .. name, icons, player)
     else
       local fluid = game.fluid_prototypes[name]
       if fluid then
@@ -366,8 +377,8 @@ return function(player_index, language_data)
         }
         table.insert(lab_items, lab_item)
         table.insert(lab_hash_items, name)
-        local scale = utils.get_scaled_size(fluid) or 2
-        table.insert(scaled_icons, {name = name, sprite = "fluid/" .. name, scale = scale})
+        local hash_id, scale = utils.get_order_info("fluid/" .. name, player)
+        add_icon(hash_id, name, scale or 2, "fluid/" .. name, icons, player)
       else
         player.print({"factoriolab-export.warn-no-item-prototype", item.name}, color_warn)
       end
@@ -388,11 +399,8 @@ return function(player_index, language_data)
     }
     table.insert(lab_recipes, lab_recipe)
     table.insert(lab_hash_recipes, name)
-    if game.item_prototypes[name] == nil and game.fluid_prototypes[name] == nil then
-      -- TODO: Detect if this recipe icon differs from item / fluid icon and then use it instead
-      local scale = utils.get_scaled_size(recipe) or 2
-      table.insert(scaled_icons, {name = name, sprite = "recipe/" .. name, scale = scale})
-    end
+    local hash_id, scale = utils.get_order_info("recipe/" .. name, player)
+    add_icon(hash_id, name, scale or 2, "recipe/" .. name, icons, player)
   end
 
   -- Process 'fake' recipes
@@ -404,7 +412,7 @@ return function(player_index, language_data)
         for _, silo in pairs(producers.silos) do
           local desired_id = item.rocket_launch_products[1].name
           local backup_id = silo.name .. name .. "-launch"
-          local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
+          local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
           local lab_in = {[name] = 1}
           local lab_part
           local fixed_recipe_outputs = calculate_products(game.recipe_prototypes[silo.fixed_recipe].products)
@@ -431,7 +439,7 @@ return function(player_index, language_data)
       if item.burnt_result then
         local desired_id = item.burnt_result.name
         local backup_id = name .. "-burn"
-        local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
+        local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
         lab_recipe = {
           id = id,
           name = item_names[name] .. " : " .. item_names[item.burnt_result.name],
@@ -451,7 +459,7 @@ return function(player_index, language_data)
       if entity.resource_category then
         local desired_id = name
         local backup_id = name .. "-mining"
-        local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
+        local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
         local lab_in = {}
         if entity.mineable_properties.required_fluid then
           local amount = entity.mineable_properties.fluid_amount / 10
@@ -480,7 +488,7 @@ return function(player_index, language_data)
       if entity.type == "offshore-pump" then
         local desired_id = entity.fluid.name
         local backup_id = name .. "-pump"
-        local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
+        local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
         local lab_recipe = {
           id = id,
           name = item_names[name] .. " : " .. fluid_names[entity.fluid.name],
@@ -503,7 +511,7 @@ return function(player_index, language_data)
           if entity.target_temperature == 165 then
             local desired_id = steam.name
             local backup_id = name .. "-boil"
-            local id = check_recipe_name(lab_recipes, desired_id, backup_id, copied_icons)
+            local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
 
             local temp_diff = 165 - 15
             local energy_reqd = temp_diff * water.heat_capacity / 1000
@@ -534,9 +542,9 @@ return function(player_index, language_data)
       name = group_names[name]
     }
 
-    local scale = utils.get_scaled_size(group)
     table.insert(lab_categories, lab_category)
-    table.insert(scaled_icons, {name = name, sprite = "item-group/" .. name, scale = scale})
+    local hash_id, scale = utils.get_order_info("item-group/" .. name, player)
+    add_icon(hash_id, name, scale or 0.25, "item-group/" .. name, icons, player)
   end
 
   -- Process infinite technology
@@ -544,9 +552,9 @@ return function(player_index, language_data)
     id = "research",
     name = gui_names["research"]
   }
-  local research_scale = utils.get_scaled_size(game.technology_prototypes["space-science-pack"])
   table.insert(lab_categories, lab_category)
-  table.insert(scaled_icons, {name = "research", sprite = "technology/space-science-pack", scale = research_scale})
+  local research_hash_id, research_scale = utils.get_order_info("technology/space-science-pack", player)
+  add_icon(research_hash_id, "research", research_scale or 0.25, "technology/space-science-pack", icons, player)
   local tech_col = 0
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
@@ -554,8 +562,8 @@ return function(player_index, language_data)
       local desired_id = name
       local backup_id = name .. "-technology"
       local id = check_recipe_name(lab_recipes, desired_id, backup_id, {})
-      local scale = utils.get_scaled_size(tech) or 0.25
-      table.insert(scaled_icons, {name = id, sprite = "technology/" .. name, scale = scale})
+      local hash_id, scale = utils.get_order_info("technology/" .. name, player)
+      add_icon(hash_id, name, scale or 0.25, "technology/" .. name, icons, player)
       local lab_item = {
         id = id,
         name = technology_names[name],
@@ -637,7 +645,7 @@ return function(player_index, language_data)
 
   local x = 0
   local y = 0
-  for _, icon in pairs(scaled_icons) do
+  for _, icon in pairs(icons) do
     rendering.draw_sprite(
       {
         sprite = icon.sprite,
@@ -654,15 +662,13 @@ return function(player_index, language_data)
       position = string.format("%spx %spx", x > 0 and (x / 2) * -64 or 0, y > 0 and (y / 2) * -64 or 0)
     }
     table.insert(lab_icons, lab_icon)
-    if copied_icons[icon.name] then
-      for _, copy in pairs(copied_icons[icon.name]) do
-        local lab_icon_copy = {
-          id = copy,
-          color = "#000000",
-          position = lab_icon.position
-        }
-        table.insert(lab_icons, lab_icon_copy)
-      end
+    for _, copy in pairs(icon.copies) do
+      local lab_icon_copy = {
+        id = copy,
+        color = "#000000",
+        position = lab_icon.position
+      }
+      table.insert(lab_icons, lab_icon_copy)
     end
     x = x + 2
     if x == 32 then

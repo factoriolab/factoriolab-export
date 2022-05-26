@@ -53,12 +53,23 @@ function utils.to_table(array)
   return table
 end
 
-function utils.get_scaled_size(proto)
-  local size = tonumber(string.match(proto.order, ".-|(%d+)"))
-  if not size then
-    return nil
+function utils.get_order_info(key)
+  local noise_layer_name = "factoriolab-export/" .. key
+  local noise_layer = game.noise_layer_prototypes[noise_layer_name]
+  if noise_layer == nil then
+    return nil, nil
   end
-  return 64 / size
+  local hash_id, size = string.match(noise_layer.order, "^(.+)|(.+)$")
+  if hash_id and size then
+    return tonumber(hash_id), 64 / tonumber(size)
+  else
+    hash_id = string.match(noise_layer.order, "^(.+)$")
+    if hash_id then
+      return tonumber(hash_id), nil
+    else
+      return nil, nil
+    end
+  end
 end
 
 return utils
