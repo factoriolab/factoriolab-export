@@ -9,18 +9,11 @@ local function convert_emissions(emissions, energy)
   return emissions * energy * 1000 * 60
 end
 
-local function get_fuel_category(entity, player)
-  local category = nil
+local function get_fuel_category(entity)
   for fuel_category, _ in pairs(entity.burner_prototype.fuel_categories) do
-    if category == nil then
-      category = fuel_category
-    else
-      -- TODO: Allow array of fuel types in data?
-      player.print({"factoriolab-export.warn-multiple-fuel-categories", entity.name})
-      break
-    end
+    return fuel_category
   end
-  return category
+  return nil
 end
 
 function entity_utils.get_powered_entity(entity)

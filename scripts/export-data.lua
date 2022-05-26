@@ -183,6 +183,19 @@ return function(player_index, language_data)
       if item.place_result then
         local entity = item.place_result
         local category = nil
+
+        -- Check and warn for multiple fuel categories
+        if entity.burner_prototype then
+          local num_categories = 0
+          for a, b in pairs(entity.burner_prototype.fuel_categories) do
+            num_categories = num_categories + 1
+          end
+          if num_categories > 1 then
+            -- TODO: Allow array of fuel types in data?
+            player.print({"factoriolab-export.warn-multiple-fuel-categories", entity.name}, color_warn)
+          end
+        end
+
         if entity.type == "transport-belt" then
           lab_item.belt = {speed = entity.belt_speed * 480}
           lab_default_min_belt = compare_default_min(lab_default_min_belt, name, true, entity.belt_speed)
@@ -517,7 +530,8 @@ return function(player_index, language_data)
       id = name,
       name = group_names[name]
     }
-    local scale = utils.get_scaled_size(group) or 0.25
+    local scale = utils.get_scaled_size(group)
+
     table.insert(lab_categories, lab_category)
     table.insert(scaled_icons, {name = name, sprite = "item-group/" .. name, scale = scale})
   end
@@ -527,8 +541,9 @@ return function(player_index, language_data)
     id = "research",
     name = gui_names["research"]
   }
+  local research_scale = utils.get_scaled_size(game.technology_prototypes["space-science-pack"])
   table.insert(lab_categories, lab_category)
-  table.insert(scaled_icons, {name = "research", sprite = "technology/space-science-pack", scale = 0.25})
+  table.insert(scaled_icons, {name = "research", sprite = "technology/space-science-pack", scale = research_scale})
   local tech_col = 0
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
