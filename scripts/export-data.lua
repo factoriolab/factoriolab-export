@@ -548,10 +548,13 @@ return function(player_index, language_data)
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
     if tech.research_unit_count_formula then
+      local desired_id = name
+      local backup_id = name .. "-technology"
+      local id = check_recipe_name(lab_recipes, desired_id, backup_id, {})
       local scale = utils.get_scaled_size(tech) or 0.25
-      table.insert(scaled_icons, {name = name, sprite = "technology/" .. name, scale = scale})
+      table.insert(scaled_icons, {name = id, sprite = "technology/" .. name, scale = scale})
       local lab_item = {
-        id = name,
+        id = id,
         name = technology_names[name],
         category = "research",
         stack = 200,
@@ -560,18 +563,18 @@ return function(player_index, language_data)
       table.insert(lab_items, lab_item)
       -- Allow modules on research recipes
       for limitation, _ in pairs(lab_limitations) do
-        table.insert(lab_limitations[limitation], name)
+        table.insert(lab_limitations[limitation], id)
       end
       local lab_recipe = {
-        id = name,
+        id = id,
         name = technology_names[name],
         time = tech.research_unit_energy / 60,
         ["in"] = calculate_ingredients(tech.research_unit_ingredients),
-        out = {[name] = 1},
+        out = {[id] = 1},
         producers = producers.labs
       }
       table.insert(lab_recipes, lab_recipe)
-      table.insert(lab_hash_recipes, name)
+      table.insert(lab_hash_recipes, id)
       safe_add_recipe_items(lab_recipe, lab_hash_items)
       tech_col = tech_col + 1
       if tech_col == 10 then
