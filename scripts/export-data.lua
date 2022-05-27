@@ -7,7 +7,7 @@ local folder = "factoriolab-export/"
 local color_warn = {r = 1, g = 0.5, b = 0}
 local color_good = {r = 0, g = 1, b = 0}
 
-local function add_icon(hash_id, name, scale, sprite, icons, player)
+local function add_icon(hash_id, name, scale, sprite, icons)
   for _, icon in pairs(icons) do
     if icon.hash_id and icon.hash_id == hash_id then
       table.insert(icon.copies, name)
@@ -362,8 +362,8 @@ return function(player_index, language_data)
 
       table.insert(lab_items, lab_item)
       table.insert(lab_hash_items, name)
-      local hash_id, scale = utils.get_order_info("item/" .. name, player)
-      add_icon(hash_id, name, scale or 2, "item/" .. name, icons, player)
+      local hash_id, scale = utils.get_order_info("item/" .. name)
+      add_icon(hash_id, name, scale or 2, "item/" .. name, icons)
     else
       local fluid = game.fluid_prototypes[name]
       if fluid then
@@ -377,8 +377,8 @@ return function(player_index, language_data)
         }
         table.insert(lab_items, lab_item)
         table.insert(lab_hash_items, name)
-        local hash_id, scale = utils.get_order_info("fluid/" .. name, player)
-        add_icon(hash_id, name, scale or 2, "fluid/" .. name, icons, player)
+        local hash_id, scale = utils.get_order_info("fluid/" .. name)
+        add_icon(hash_id, name, scale or 2, "fluid/" .. name, icons)
       else
         player.print({"factoriolab-export.warn-no-item-prototype", item.name}, color_warn)
       end
@@ -399,8 +399,8 @@ return function(player_index, language_data)
     }
     table.insert(lab_recipes, lab_recipe)
     table.insert(lab_hash_recipes, name)
-    local hash_id, scale = utils.get_order_info("recipe/" .. name, player)
-    add_icon(hash_id, name, scale or 2, "recipe/" .. name, icons, player)
+    local hash_id, scale = utils.get_order_info("recipe/" .. name)
+    add_icon(hash_id, name, scale or 2, "recipe/" .. name, icons)
   end
 
   -- Process 'fake' recipes
@@ -543,8 +543,8 @@ return function(player_index, language_data)
     }
 
     table.insert(lab_categories, lab_category)
-    local hash_id, scale = utils.get_order_info("item-group/" .. name, player)
-    add_icon(hash_id, name, scale or 0.25, "item-group/" .. name, icons, player)
+    local hash_id, scale = utils.get_order_info("item-group/" .. name)
+    add_icon(hash_id, name, scale or 0.25, "item-group/" .. name, icons)
   end
 
   -- Process infinite technology
@@ -553,8 +553,8 @@ return function(player_index, language_data)
     name = gui_names["research"]
   }
   table.insert(lab_categories, lab_category)
-  local research_hash_id, research_scale = utils.get_order_info("technology/space-science-pack", player)
-  add_icon(research_hash_id, "research", research_scale or 0.25, "technology/space-science-pack", icons, player)
+  local research_hash_id, research_scale = utils.get_order_info("technology/space-science-pack")
+  add_icon(research_hash_id, "research", research_scale or 0.25, "technology/space-science-pack", icons)
   local tech_col = 0
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
@@ -562,8 +562,8 @@ return function(player_index, language_data)
       local desired_id = name
       local backup_id = name .. "-technology"
       local id = check_recipe_name(lab_recipes, desired_id, backup_id, {})
-      local hash_id, scale = utils.get_order_info("technology/" .. name, player)
-      add_icon(hash_id, name, scale or 0.25, "technology/" .. name, icons, player)
+      local hash_id, scale = utils.get_order_info("technology/" .. name)
+      add_icon(hash_id, name, scale or 0.25, "technology/" .. name, icons)
       local lab_item = {
         id = id,
         name = technology_names[name],
@@ -614,6 +614,25 @@ return function(player_index, language_data)
 
     -- [IR2] Disable scrapping recipes
     if game.active_mods["IndustrialRevolution"] and string.find(lab_recipe.id, "^scrap%-") then
+      disable = true
+    end
+
+    -- [SXP] Disable delivery cannon recipes
+    if
+      game.active_mods["space-exploration"] and
+        (string.find(lab_recipe.id, "^se%-delivery%-cannon%-pack%-") or
+          string.find(rcp.name, "^se%-delivery%-cannon%-weapon%-pack%-"))
+     then
+      disable = true
+    end
+
+    -- [ANG] Disable void recipes
+    if game.active_mods["angelsrefining"] and string.find(lab_recipe.id, "^void%-") then
+      disable = true
+    end
+
+    -- [NLS] Disable unboxing recipes
+    if game.active_mods["nullius"] and string.find(lab_recipe.id, "^nullius%-unbox%-") then
       disable = true
     end
 

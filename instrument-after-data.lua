@@ -53,7 +53,7 @@ local function check_overflow(obj)
   return nil
 end
 
-local function check_size(key)
+local function check_size(key, store_as)
   raw = data.raw[key]
   for _, obj in pairs(raw) do
     local order = get_icon_hash(obj)
@@ -64,7 +64,7 @@ local function check_size(key)
     if size then
       order = order .. "|" .. size
     end
-    local name = prefix .. key .. "/" .. obj.name
+    local name = prefix .. (store_as or key) .. "/" .. obj.name
     table.insert(noise_layers, {name = name, order = order, type = "noise-layer"})
   end
 end
@@ -84,6 +84,16 @@ local function check_size_alt(key)
 end
 
 check_size("item")
+check_size("ammo", "item")
+check_size("armor", "item")
+check_size("capsule", "item")
+check_size("gun", "item")
+check_size("item-with-entity-data", "item")
+check_size("module", "item")
+check_size("rail-planner", "item")
+check_size("repair-tool", "item")
+check_size("spidertron-remote", "item")
+check_size("tool", "item")
 check_size("fluid")
 check_size("recipe")
 check_size_alt("item-group")
