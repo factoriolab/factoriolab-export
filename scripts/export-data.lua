@@ -8,13 +8,17 @@ local color_warn = {r = 1, g = 0.5, b = 0}
 local color_good = {r = 0, g = 1, b = 0}
 
 local function add_icon(hash_id, name, scale, sprite, icons)
-  for _, icon in pairs(icons) do
-    if icon.hash_id and icon.hash_id == hash_id then
-      table.insert(icon.copies, name)
-      return
+  if hash_id ~= -1 then
+    if hash_id then
+      for _, icon in pairs(icons) do
+        if icon.hash_id == hash_id then
+          table.insert(icon.copies, name)
+          return
+        end
+      end
     end
+    table.insert(icons, {hash_id = hash_id, name = name, scale = scale, sprite = sprite, copies = {}})
   end
-  table.insert(icons, {hash_id = hash_id, name = name, scale = scale, sprite = sprite, copies = {}})
 end
 
 local function check_recipe_name(recipes, desired_id, backup_id, icons)
@@ -354,9 +358,11 @@ return function(player_index, language_data)
           category = item.fuel_category,
           result = item.burnt_result and item.burnt_result.name
         }
-        local is_resource =
-          game.entity_prototypes[name] and game.entity_prototypes[name].resource_category ~= nil or false
-        lab_default_fuel = compare_default_max(lab_default_fuel, name, is_resource, item.fuel_value)
+        if item.fuel_category == "chemical" then
+          local is_resource =
+            game.entity_prototypes[name] and game.entity_prototypes[name].resource_category ~= nil or false
+          lab_default_fuel = compare_default_max(lab_default_fuel, name, is_resource, item.fuel_value)
+        end
         table.insert(lab_hash_fuels, name)
       end
 
@@ -397,10 +403,14 @@ return function(player_index, language_data)
       out = lab_out,
       producers = producers.crafting[recipe.category]
     }
+    local hash_id, scale = utils.get_order_info("recipe/" .. name)
+    if hash_id and hash_id ~= -1 then
+      local icon_id = name .. "|recipe"
+      lab_recipe.icon = icon_id
+      add_icon(hash_id, icon_id, scale or 2, "recipe/" .. name, icons)
+    end
     table.insert(lab_recipes, lab_recipe)
     table.insert(lab_hash_recipes, name)
-    local hash_id, scale = utils.get_order_info("recipe/" .. name)
-    add_icon(hash_id, name, scale or 2, "recipe/" .. name, icons)
   end
 
   -- Process 'fake' recipes
@@ -553,8 +563,17 @@ return function(player_index, language_data)
     name = gui_names["research"]
   }
   table.insert(lab_categories, lab_category)
-  local research_hash_id, research_scale = utils.get_order_info("technology/space-science-pack")
-  add_icon(research_hash_id, "research", research_scale or 0.25, "technology/space-science-pack", icons)
+  local sprite = "space-science-pack"
+  if game.active_mods["space-exploration"] then
+    sprite = "se-rocket-science-pack"
+  end
+  if not game.technology_prototypes[sprite] then
+    player.print({"factoriolab-export.warn-no-research-sprite", sprite}, color_warn)
+  else
+    sprite = "technology/" .. sprite
+    local research_hash_id, research_scale = utils.get_order_info(sprite)
+    add_icon(research_hash_id, "research", research_scale or 0.25, sprite, icons)
+  end
   local tech_col = 0
   local tech_row = 0
   for name, tech in pairs(game.technology_prototypes) do
@@ -563,7 +582,7 @@ return function(player_index, language_data)
       local backup_id = name .. "-technology"
       local id = check_recipe_name(lab_recipes, desired_id, backup_id, {})
       local hash_id, scale = utils.get_order_info("technology/" .. name)
-      add_icon(hash_id, name, scale or 0.25, "technology/" .. name, icons)
+      add_icon(hash_id, id, scale or 0.25, "technology/" .. name, icons)
       local lab_item = {
         id = id,
         name = technology_names[name],
@@ -621,7 +640,7 @@ return function(player_index, language_data)
     if
       game.active_mods["space-exploration"] and
         (string.find(lab_recipe.id, "^se%-delivery%-cannon%-pack%-") or
-          string.find(rcp.name, "^se%-delivery%-cannon%-weapon%-pack%-"))
+          string.find(lab_recipe.id, "^se%-delivery%-cannon%-weapon%-pack%-"))
      then
       disable = true
     end
@@ -728,6 +747,37 @@ return function(player_index, language_data)
     end
   end
 
+  -- Safely build arrays for defaults
+  lab_default_min_factory_rank = {}
+  if lab_default_min_assembler then
+    table.insert(lab_default_min_factory_rank, lab_default_min_assembler[1])
+  end
+  if lab_default_min_furnace then
+    table.insert(lab_default_min_factory_rank, lab_default_min_furnace[1])
+  end
+  if lab_default_min_drill then
+    table.insert(lab_default_min_factory_rank, lab_default_min_drill[1])
+  end
+
+  lab_default_max_factory_rank = {}
+  if lab_default_max_assembler then
+    table.insert(lab_default_max_factory_rank, lab_default_min_assembler[1])
+  end
+  if lab_default_max_furnace then
+    table.insert(lab_default_max_factory_rank, lab_default_max_furnace[1])
+  end
+  if lab_default_max_drill then
+    table.insert(lab_default_max_factory_rank, lab_default_max_drill[1])
+  end
+
+  lab_default_module_rank = {}
+  if lab_default_prod_module then
+    table.insert(lab_default_module_rank, lab_default_prod_module[1])
+  end
+  if lab_default_speed_module then
+    table.insert(lab_default_module_rank, lab_default_speed_module[1])
+  end
+
   lab_data = {
     version = version,
     categories = lab_categories,
@@ -743,20 +793,9 @@ return function(player_index, language_data)
       cargoWagon = lab_default_cargo_wagon,
       fluidWagon = lab_default_fluid_wagon,
       disabledRecipes = lab_default_disabled_recipes,
-      minFactoryRank = {
-        lab_default_min_assembler and lab_default_min_assembler[1],
-        lab_default_min_furnace and lab_default_min_furnace[1],
-        lab_default_min_drill and lab_default_min_drill[1]
-      },
-      maxFactoryRank = {
-        lab_default_max_assembler and lab_default_max_assembler[1],
-        lab_default_max_furnace and lab_default_max_furnace[1],
-        lab_default_max_drill and lab_default_max_drill[1]
-      },
-      moduleRank = {
-        lab_default_prod_module and lab_default_prod_module[1],
-        lab_default_speed_module and lab_default_speed_module[1]
-      },
+      minFactoryRank = lab_default_min_factory_rank,
+      maxFactoryRank = lab_default_max_factory_rank,
+      moduleRank = lab_default_module_rank,
       beaconModule = lab_default_speed_module and lab_default_speed_module[1]
     }
   }

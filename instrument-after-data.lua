@@ -3,6 +3,10 @@ local prefix = "factoriolab-export/"
 
 local icon_hash, icon_hash_id = {}, 0
 local function get_icon_hash(obj)
+  if not obj.icon and not obj.icons then
+    return -1
+  end
+
   local serialized = string.format("%s.%s.%s", obj.icon or "", obj.icon_size or "", obj.icon_mipmaps or "")
   if obj.icons then
     for _, icon in pairs(obj.icons) do
