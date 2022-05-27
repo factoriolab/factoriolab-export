@@ -123,6 +123,10 @@ return function(player_index, language_data)
   local dictionaries = language_data.dictionaries
   local language = language_data.language
 
+  local function warn_player(msg)
+    player.print(msg, color_warn)
+  end
+
   -- Localized names
   local group_names = dictionaries["item_group_names"]
   local item_names = dictionaries["item_names"]
@@ -199,25 +203,13 @@ return function(player_index, language_data)
         local entity = item.place_result
         local category = nil
 
-        -- Check and warn for multiple fuel categories
-        if entity.burner_prototype then
-          local num_categories = 0
-          for a, b in pairs(entity.burner_prototype.fuel_categories) do
-            num_categories = num_categories + 1
-          end
-          if num_categories > 1 then
-            -- TODO: Allow array of fuel types in data?
-            player.print({"factoriolab-export.warn-multiple-fuel-categories", entity.name}, color_warn)
-          end
-        end
-
         if entity.type == "transport-belt" then
           lab_item.belt = {speed = entity.belt_speed * 480}
           lab_default_min_belt = compare_default_min(lab_default_min_belt, name, true, entity.belt_speed)
           lab_default_max_belt = compare_default_max(lab_default_max_belt, name, true, entity.belt_speed)
           table.insert(lab_hash_belts, name)
         elseif entity.type == "beacon" then
-          lab_item.beacon = entity_utils.get_powered_entity(entity)
+          lab_item.beacon = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.beacon.effectivity = entity.distribution_effectivity
           lab_item.beacon.modules = entity.module_inventory_size
           lab_item.beacon.range = entity.supply_area_distance
@@ -226,7 +218,7 @@ return function(player_index, language_data)
           end
           table.insert(lab_hash_beacons, name)
         elseif entity.type == "mining-drill" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.mining = true
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = entity.mining_speed
@@ -238,13 +230,13 @@ return function(player_index, language_data)
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "offshore-pump" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = entity.pumping_speed * 60
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "furnace" or entity.type == "assembling-machine" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = entity.crafting_speed
           local is_electric = lab_item.factory.type == "electric"
@@ -262,21 +254,21 @@ return function(player_index, language_data)
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "lab" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.research = true
           lab_item.factory.speed = entity.researching_speed
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "boiler" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = lab_item.factory.usage -- Speed is based on usage
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "rocket-silo" then
           -- TODO: Account for launch animation energy usage spike
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = entity.crafting_speed
           lab_item.factory.silo = {
@@ -286,7 +278,7 @@ return function(player_index, language_data)
           entity_utils.process_producers(entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "reactor" then
-          lab_item.factory = entity_utils.get_powered_entity(entity)
+          lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = 0
           lab_item.factory.speed = 1
           entity_utils.process_producers(entity, producers)

@@ -16,7 +16,7 @@ local function get_fuel_category(entity)
   return nil
 end
 
-function entity_utils.get_powered_entity(entity)
+function entity_utils.get_powered_entity(entity, warn_player)
   local energy_type = nil
   local fuel_category = nil
   local energy_usage = nil
@@ -34,6 +34,10 @@ function entity_utils.get_powered_entity(entity)
     energy_drain = utils.convert_energy(entity.electric_energy_source_prototype.drain)
     pollution = convert_emissions(entity.electric_energy_source_prototype.emissions, energy_usage)
   elseif entity.burner_prototype ~= nil then
+    if #entity.burner_prototype.fuel_categories > 1 then
+      -- TODO: Allow multiple fuel categories
+      warn_player({"factoriolab-export.warn-multiple-fuel-categories", entity.name})
+    end
     energy_type = "burner"
     fuel_category = get_fuel_category(entity)
     pollution = convert_emissions(entity.burner_prototype.emissions, energy_usage)
