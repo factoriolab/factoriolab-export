@@ -400,9 +400,22 @@ return function(player_index, language_data)
     if hash_id and hash_id ~= -1 then
       local icon_id = name
       for _, icon in pairs(icons) do
+        local duplicate = false
         if icon.name == icon_id then
+          duplicate = true -- Icon matches, found duplicate
+        else
+          for _, copy in pairs(icon.copies) do
+            if copy == icon_id then
+              duplicate = true -- Copy of this icon matches, found duplicate
+              break
+            end
+          end
+        end
+
+        if duplicate then
           icon_id = name .. "|recipe"
           lab_recipe.icon = icon_id
+          break
         end
       end
       add_icon(hash_id, icon_id, scale or 2, "recipe/" .. name, icons)

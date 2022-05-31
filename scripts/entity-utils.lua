@@ -105,7 +105,9 @@ function entity_utils.process_producers(name, entity, producers)
   if entity.type == "lab" then
     table.insert(producers.labs, name)
   elseif entity.type == "rocket-silo" then
-    producers.silos[name] = entity
+    if entity.fixed_recipe then
+      producers.silos[name] = entity
+    end
   end
 end
 
