@@ -476,7 +476,7 @@ return function(player_index, language_data)
         local lab_out, total = calculate_products(entity.mineable_properties.products)
         local lab_recipe = {
           id = id,
-          name = item_names[name],
+          name = item_names[name] or fluid_names[name],
           time = entity.mineable_properties.mining_time,
           ["in"] = lab_in,
           out = lab_out,
@@ -680,7 +680,7 @@ return function(player_index, language_data)
   local sprite_surface = game.create_surface("lab-sprite")
 
   -- Calculate sprite sheet width (height determined by # of loop iterations)
-  local width = math.floor((#icons) ^ 0.5)
+  local width = math.ceil((#icons) ^ 0.5)
   if width < 8 then
     width = 8
   end
