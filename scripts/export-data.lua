@@ -398,8 +398,13 @@ return function(player_index, language_data)
     }
     local hash_id, scale = utils.get_order_info("recipe/" .. name)
     if hash_id and hash_id ~= -1 then
-      local icon_id = name .. "|recipe"
-      lab_recipe.icon = icon_id
+      local icon_id = name
+      for _, icon in pairs(icons) do
+        if icon.name == icon_id then
+          icon_id = name .. "|recipe"
+          lab_recipe.icon = icon_id
+        end
+      end
       add_icon(hash_id, icon_id, scale or 2, "recipe/" .. name, icons)
     end
     table.insert(lab_recipes, lab_recipe)
