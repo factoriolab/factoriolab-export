@@ -679,11 +679,17 @@ return function(player_index, language_data)
   local lab_icons = {}
   local sprite_surface = game.create_surface("lab-sprite")
 
-  local x = 0
-  local y = 0
-  local width = player_settings["factoriolab-export-sprite-width"].value
+  -- Calculate sprite sheet width (height determined by # of loop iterations)
+  local width = math.floor((#icons) ^ 0.5)
+  if width < 8 then
+    width = 8
+  end
+  width = width * 2
   local x_position = (width / 2) - 1
   local x_resolution = width * 32
+
+  local x = 0
+  local y = 0
   for _, icon in pairs(icons) do
     rendering.draw_sprite(
       {
@@ -712,10 +718,6 @@ return function(player_index, language_data)
     if x == width then
       y = y + 2
       x = 0
-    end
-    if y == 512 then
-      player.print({"factoriolab-export.error-sprite-too-large"}, color_error)
-      break
     end
   end
 
