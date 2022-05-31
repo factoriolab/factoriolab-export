@@ -92,20 +92,20 @@ local function add_producers(name, categories, producers)
   end
 end
 
-function entity_utils.process_producers(entity, producers)
+function entity_utils.process_producers(name, entity, producers)
   if entity.resource_categories then
-    add_producers(entity.name, entity.resource_categories, producers.resource)
+    add_producers(name, entity.resource_categories, producers.resource)
   end
   if entity.crafting_categories then
-    add_producers(entity.name, entity.crafting_categories, producers.crafting)
+    add_producers(name, entity.crafting_categories, producers.crafting)
   end
   if entity.burner_prototype and entity.burner_prototype.fuel_categories then
-    add_producers(entity.name, entity.burner_prototype.fuel_categories, producers.burner)
+    add_producers(name, entity.burner_prototype.fuel_categories, producers.burner)
   end
   if entity.type == "lab" then
-    table.insert(producers.labs, entity.name)
+    table.insert(producers.labs, name)
   elseif entity.type == "silo" then
-    table.insert(producers.silos, entity)
+    producers.silos[name] = entity
   end
 end
 

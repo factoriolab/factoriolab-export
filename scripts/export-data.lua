@@ -228,13 +228,13 @@ return function(player_index, language_data)
             lab_default_min_drill = compare_default_min(lab_default_min_drill, name, is_electric, entity.mining_speed)
             lab_default_max_drill = compare_default_max(lab_default_max_drill, name, is_electric, entity.mining_speed)
           end
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "offshore-pump" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = entity.pumping_speed * 60
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "furnace" or entity.type == "assembling-machine" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
@@ -252,20 +252,20 @@ return function(player_index, language_data)
             lab_default_max_furnace =
               compare_default_max(lab_default_max_furnace, name, is_electric, entity.crafting_speed)
           end
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "lab" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.research = true
           lab_item.factory.speed = entity.researching_speed
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "boiler" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.speed = lab_item.factory.usage -- Speed is based on usage
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "rocket-silo" then
           -- TODO: Account for launch animation energy usage spike
@@ -276,13 +276,13 @@ return function(player_index, language_data)
             parts = entity.rocket_parts_required,
             launch = entity_utils.launch_ticks(entity)
           }
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "reactor" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = 0
           lab_item.factory.speed = 1
-          entity_utils.process_producers(entity, producers)
+          entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "cargo-wagon" then
           lab_item.cargoWagon = {
@@ -412,9 +412,9 @@ return function(player_index, language_data)
     if item then
       -- Check for launch recipe
       if item.rocket_launch_products and #item.rocket_launch_products > 0 then
-        for _, silo in pairs(producers.silos) do
+        for silo_name, silo in pairs(producers.silos) do
           local desired_id = item.rocket_launch_products[1].name
-          local backup_id = silo.name .. name .. "-launch"
+          local backup_id = silo_name .. name .. "-launch"
           local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
           local lab_in = {[name] = 1}
           local lab_part
@@ -426,12 +426,12 @@ return function(player_index, language_data)
           local lab_out, total = calculate_products(item.rocket_launch_products)
           local lab_recipe = {
             id = id,
-            name = item_names[silo.name] .. " : " .. item_names[item.rocket_launch_products[1].name],
+            name = item_names[silo_name] .. " : " .. item_names[item.rocket_launch_products[1].name],
             time = 40.6, -- This is later overridden to include launch time in ticks
             ["in"] = lab_in,
             out = lab_out,
             part = lab_part,
-            producers = {silo.name}
+            producers = {silo_name}
           }
           table.insert(lab_recipes, lab_recipe)
           table.insert(lab_hash_recipes, id)
@@ -760,7 +760,7 @@ return function(player_index, language_data)
 
   lab_default_max_factory_rank = {}
   if lab_default_max_assembler then
-    table.insert(lab_default_max_factory_rank, lab_default_min_assembler[1])
+    table.insert(lab_default_max_factory_rank, lab_default_max_assembler[1])
   end
   if lab_default_max_furnace then
     table.insert(lab_default_max_factory_rank, lab_default_max_furnace[1])
