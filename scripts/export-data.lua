@@ -4,6 +4,7 @@ local json = require("json")
 local utils = require("utils")
 
 local folder = "factoriolab-export/"
+local color_error = {r = 1, g = 0, b = 0}
 local color_warn = {r = 1, g = 0.5, b = 0}
 local color_good = {r = 0, g = 1, b = 0}
 
@@ -378,7 +379,7 @@ return function(player_index, language_data)
         local hash_id, scale = utils.get_order_info("fluid/" .. name)
         add_icon(hash_id, name, scale or 2, "fluid/" .. name, icons)
       else
-        player.print({"factoriolab-export.warn-no-item-prototype", item.name}, color_warn)
+        player.print({"factoriolab-export.error-no-item-prototype", item.name}, color_error)
       end
     end
   end
@@ -560,7 +561,7 @@ return function(player_index, language_data)
     sprite = "se-rocket-science-pack"
   end
   if not game.technology_prototypes[sprite] then
-    player.print({"factoriolab-export.warn-no-research-sprite", sprite}, color_warn)
+    player.print({"factoriolab-export.error-no-research-sprite", sprite}, color_error)
   else
     sprite = "technology/" .. sprite
     local research_hash_id, research_scale = utils.get_order_info(sprite)
@@ -675,11 +676,13 @@ return function(player_index, language_data)
 
   local x = 0
   local y = 0
+  local width = player_settings["factoriolab-export-sprite-width"].value
+  local x_position = (width / 2) - 1
+  local x_resolution = width * 32
   for _, icon in pairs(icons) do
     rendering.draw_sprite(
       {
         sprite = icon.sprite,
-        -- TODO: Check for layers out of bounds in data-final-fixes.lua
         x_scale = icon.scale,
         y_scale = icon.scale,
         target = {x = x, y = y},
@@ -701,9 +704,13 @@ return function(player_index, language_data)
       table.insert(lab_icons, lab_icon_copy)
     end
     x = x + 2
-    if x == 32 then
+    if x == width then
       y = y + 2
       x = 0
+    end
+    if y == 512 then
+      player.print({"factoriolab-export.error-sprite-too-large"}, color_error)
+      break
     end
   end
 
@@ -720,8 +727,8 @@ return function(player_index, language_data)
       player = player,
       by_player = player,
       surface = sprite_surface,
-      position = {15, y_position},
-      resolution = {1024, y_resolution},
+      position = {x_position, y_position},
+      resolution = {x_resolution, y_resolution},
       zoom = 1,
       quality = 100,
       daytime = 1,

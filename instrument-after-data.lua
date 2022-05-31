@@ -49,8 +49,15 @@ local function check_overflow(obj)
       local b = (icon.shift[2] < 0 and icon.shift[2] * -1) or icon.shift[2]
       local offset = (a > b and a) or b
       local width = ((ico_size / 2) + offset) * 2
-      if width > size then
-        return (width / size) * 32
+
+      local compare_size = size
+      if base.icon_size == 64 and base.scale == nil and icon.icon_size == 32 and icon.scale == nil then
+        log(obj.name .. ": Icon edge case detected, overriding compare size from 64 to 32")
+        compare_size = 32
+      end
+
+      if width > compare_size then
+        return (width / compare_size) * 32
       end
     end
   end
