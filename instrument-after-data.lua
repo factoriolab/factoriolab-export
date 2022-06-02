@@ -41,13 +41,6 @@ local function check_overflow(obj)
   local base = obj.icons[1]
   local size = (base.icon_size or obj.icon_size) * (base.scale or 1)
   local compare_size = size
-  local always_emit = false
-
-  if base.scale == 1 then
-    log(obj.name .. ": Icon edge case detected, always emitting size")
-    -- e.g. SXP 'se-decompressing-steam'
-    always_emit = true
-  end
 
   for i = 2, #obj.icons do
     local icon = obj.icons[i]
@@ -83,7 +76,7 @@ local function check_size(key, store_as)
   for _, obj in pairs(raw) do
     local order = get_icon_hash(obj)
     local size = check_overflow(obj)
-    if not size and obj.icon_size == nil and obj.icons and obj.icons[1].scale == 1 then
+    if not size and obj.icons and obj.icons[1].scale == 1 then
       size = obj.icons[1].icon_size
     end
     if size then
