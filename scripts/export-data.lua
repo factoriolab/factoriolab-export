@@ -437,9 +437,9 @@ return function(player_index, language_data)
           local lab_in = {[name] = 1}
           local lab_part
           local fixed_recipe_outputs = calculate_products(game.recipe_prototypes[silo.fixed_recipe].products)
-          for id, amount in pairs(fixed_recipe_outputs) do
-            lab_in[id] = amount * silo.rocket_parts_required
-            lab_part = id
+          for out_id, amount in pairs(fixed_recipe_outputs) do
+            lab_in[out_id] = amount * silo.rocket_parts_required
+            lab_part = out_id
           end
           local lab_out, total = calculate_products(item.rocket_launch_products)
           local lab_recipe = {
@@ -642,16 +642,26 @@ return function(player_index, language_data)
       disable = true
     end
 
+    -- [KR2] Disable recycling, to-matter, matter-to, and to-parts recipes
+    if
+      game.active_mods["Krastorio2"] and
+        (string.find(lab_recipe.id, "%-to%-matter$") or string.find(lab_recipe.id, "^matter%-to%-") or
+          string.find(lab_recipe.id, "%-to%-parts$"))
+     then
+      disable = true
+    end
+
     -- [IR2] Disable scrapping recipes
     if game.active_mods["IndustrialRevolution"] and string.find(lab_recipe.id, "^scrap%-") then
       disable = true
     end
 
-    -- [SXP] Disable delivery cannon recipes
+    -- [SXP] Disable se-delivery-cannon, se-recycle recipes
     if
       game.active_mods["space-exploration"] and
         (string.find(lab_recipe.id, "^se%-delivery%-cannon%-pack%-") or
-          string.find(lab_recipe.id, "^se%-delivery%-cannon%-weapon%-pack%-"))
+          string.find(lab_recipe.id, "^se%-delivery%-cannon%-weapon%-pack%-") or
+          string.find(lab_recipe.id, "^se%-recycle%-"))
      then
       disable = true
     end

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2022-06-02
+  Changed:
+    - Include Krastorio 2 'to-matter' recipes in default disabled recipes
+  Fixed:
+    - Fixed an issue where silo fixed recipes were sometimes not included
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2022-06-01
   Changed:

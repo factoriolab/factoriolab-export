@@ -14,7 +14,11 @@ local function kind_of(obj)
       return "table"
     end
   end
-  return "array"
+  if i == 1 then
+    return "table"
+  else
+    return "array"
+  end
 end
 
 local function escape_str(s)
