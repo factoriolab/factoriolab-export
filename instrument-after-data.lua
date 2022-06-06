@@ -42,7 +42,7 @@ local function check_overflow(obj)
   local size = (base.icon_size or obj.icon_size) * (base.scale or 1)
   local compare_size = size
 
-  for i = 2, #obj.icons do
+  for i = 1, #obj.icons do
     local icon = obj.icons[i]
     if icon.shift then
       local ico_size = (icon.icon_size or obj.icon_size) * (icon.scale or 1)
