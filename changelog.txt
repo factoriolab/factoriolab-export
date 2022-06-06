@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.3
-Date: 2022-06-02
+Date: 2022-06-06
   Changed:
     - Include Krastorio 2 'to-matter' recipes in default disabled recipes
   Fixed:
