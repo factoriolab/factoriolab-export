@@ -17,6 +17,13 @@ end
 
 local function process_recipes(recipes_unlocked)
   local recipes_enabled = {}
+  local fixed_recipe = {}
+  for _, entity in pairs(game.entity_prototypes) do
+    if entity.fixed_recipe then
+      fixed_recipe[entity.fixed_recipe] = true
+    end
+  end
+
   for name, recipe in pairs(game.recipe_prototypes) do
     local include = true
 
@@ -25,20 +32,17 @@ local function process_recipes(recipes_unlocked)
       include = false
     end
 
-    -- Skip recipes that are not unlocked / enabled
-    if recipe.enabled == false and not recipes_unlocked[name] then
-      include = false
-    end
-
-    -- Skip recipes that are hidden other than fixed recipes (silo)
-    local fixed_recipe = false
-    for _, entity in pairs(game.entity_prototypes) do
-      if (entity.fixed_recipe == name) then
-        fixed_recipe = true
+    -- Always include fixed recipes (that do have outputs)
+    if not fixed_recipe[name] then
+      -- Skip recipes that are not unlocked / enabled
+      if recipe.enabled == false and not recipes_unlocked[name] then
+        include = false
       end
-    end
-    if recipe.hidden == true and not fixed_recipe then
-      include = false
+
+      -- Skip recipes that are hidden
+      if recipe.hidden == true then
+        include = false
+      end
     end
 
     if include then
