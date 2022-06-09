@@ -7,6 +7,7 @@ local folder = "factoriolab-export/"
 local color_error = {r = 1, g = 0, b = 0}
 local color_warn = {r = 1, g = 0.5, b = 0}
 local color_good = {r = 0, g = 1, b = 0}
+local player
 
 local function add_icon(hash_id, name, scale, sprite, icons)
   if hash_id ~= -1 then
@@ -37,29 +38,19 @@ local function check_recipe_name(recipes, desired_id, backup_id, icons)
   return desired_id
 end
 
-local function calculate_ingredients(ingredients)
-  local lab_in = {}
-  for _, ingredient in pairs(ingredients) do
-    lab_in[ingredient.name] = ingredient.amount
-  end
-  return lab_in
-end
-
-local function calculate_products(products)
-  local lab_out = {}
-  local total = 0
-  for _, product in pairs(products) do
-    local amount = product.amount
-    if not amount then
-      amount = (product.amount_max + product.amount_min) / 2
+local function check_icon_name(desired_id, backup_id, icons)
+  for _, icon in pairs(icons) do
+    if icon.name == desired_id then
+      return backup_id
+    else
+      for _, copy in pairs(icon.copies) do
+        if copy == desired_id then
+          return backup_id
+        end
+      end
     end
-    if product.probability then
-      amount = amount * product.probability
-    end
-    total = total + amount
-    lab_out[product.name] = amount
   end
-  return lab_out, total
+  return desired_id
 end
 
 local function compare_default_min(default, name, desired_trait, desired_value)
@@ -119,7 +110,7 @@ local function safe_add_recipe_items(recipe, list)
 end
 
 return function(player_index, language_data)
-  local player = game.players[player_index]
+  player = game.players[player_index]
   local player_settings = settings.get_player_settings(player)
   local dictionaries = language_data.dictionaries
   local language = language_data.language
@@ -386,37 +377,22 @@ return function(player_index, language_data)
 
   -- Process recipes
   for name, recipe in pairs(recipes_enabled) do
-    local lab_in = calculate_ingredients(recipe.ingredients)
-    local lab_out = calculate_products(recipe.products)
+    local lab_in = utils.calculate_ingredients(recipe.ingredients)
+    local lab_out, lab_catalyst = utils.calculate_products(recipe.products)
     local lab_recipe = {
       id = name,
       name = recipe_names[name],
       time = recipe.energy,
       ["in"] = lab_in,
       out = lab_out,
+      catalyst = lab_catalyst,
       producers = producers.crafting[recipe.category]
     }
     local hash_id, scale = utils.get_order_info("recipe/" .. name)
     if hash_id and hash_id ~= -1 then
-      local icon_id = name
-      for _, icon in pairs(icons) do
-        local duplicate = false
-        if icon.name == icon_id then
-          duplicate = true -- Icon matches, found duplicate
-        else
-          for _, copy in pairs(icon.copies) do
-            if copy == icon_id then
-              duplicate = true -- Copy of this icon matches, found duplicate
-              break
-            end
-          end
-        end
-
-        if duplicate then
-          icon_id = name .. "|recipe"
-          lab_recipe.icon = icon_id
-          break
-        end
+      local icon_id = check_icon_name(name, name .. "|recipe", icons)
+      if icon_id ~= name then
+        lab_recipe.icon = icon_id
       end
       add_icon(hash_id, icon_id, scale or 2, "recipe/" .. name, icons)
     end
@@ -436,18 +412,19 @@ return function(player_index, language_data)
           local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
           local lab_in = {[name] = 1}
           local lab_part
-          local fixed_recipe_outputs = calculate_products(game.recipe_prototypes[silo.fixed_recipe].products)
+          local fixed_recipe_outputs = utils.calculate_products(game.recipe_prototypes[silo.fixed_recipe].products)
           for out_id, amount in pairs(fixed_recipe_outputs) do
             lab_in[out_id] = amount * silo.rocket_parts_required
             lab_part = out_id
           end
-          local lab_out, total = calculate_products(item.rocket_launch_products)
+          local lab_out, lab_catalyst, total = utils.calculate_products(item.rocket_launch_products)
           local lab_recipe = {
             id = id,
             name = item_names[silo_name] .. " : " .. item_names[item.rocket_launch_products[1].name],
             time = 40.6, -- This is later overridden to include launch time in ticks
             ["in"] = lab_in,
             out = lab_out,
+            catalyst = lab_catalyst,
             part = lab_part,
             producers = {silo_name}
           }
@@ -486,13 +463,14 @@ return function(player_index, language_data)
           local amount = entity.mineable_properties.fluid_amount / 10
           lab_in = {[entity.mineable_properties.required_fluid] = amount}
         end
-        local lab_out, total = calculate_products(entity.mineable_properties.products)
+        local lab_out, lab_catalyst, total = utils.calculate_products(entity.mineable_properties.products)
         local lab_recipe = {
           id = id,
           name = item_names[name] or fluid_names[name],
           time = entity.mineable_properties.mining_time,
           ["in"] = lab_in,
           out = lab_out,
+          catalyst = lab_catalyst,
           producers = producers.resource[entity.resource_category],
           cost = 10000 / total
         }
@@ -565,7 +543,11 @@ return function(player_index, language_data)
 
     table.insert(lab_categories, lab_category)
     local hash_id, scale = utils.get_order_info("item-group/" .. name)
-    add_icon(hash_id, name, scale or 0.25, "item-group/" .. name, icons)
+    local icon_id = check_icon_name(name, name .. "|category", icons)
+    if icon_id ~= name then
+      lab_category.icon = icon_id
+    end
+    add_icon(hash_id, icon_id, scale or 0.25, "item-group/" .. name, icons)
   end
 
   -- Process infinite technology
@@ -610,7 +592,7 @@ return function(player_index, language_data)
         id = id,
         name = technology_names[name],
         time = tech.research_unit_energy / 60,
-        ["in"] = calculate_ingredients(tech.research_unit_ingredients),
+        ["in"] = utils.calculate_ingredients(tech.research_unit_ingredients),
         out = {[id] = 1},
         producers = producers.labs
       }
