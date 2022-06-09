@@ -40,31 +40,42 @@ local function check_overflow(obj)
   end
   local base = obj.icons[1]
   local size = (base.icon_size or obj.icon_size) * (base.scale or 1)
+  if base.icon_size == 64 and base.scale == nil then
+    size = 32
+  end
   local compare_size = size
 
-  for i = 1, #obj.icons do
-    local icon = obj.icons[i]
+  for _, icon in pairs(obj.icons) do
     if icon.shift then
       local ico_size = (icon.icon_size or obj.icon_size) * (icon.scale or 1)
+      if icon.icon_size == 64 and icon.scale == nil then
+        ico_size = 32
+      end
       local a = (icon.shift[1] < 0 and icon.shift[1] * -1) or icon.shift[1]
       local b = (icon.shift[2] < 0 and icon.shift[2] * -1) or icon.shift[2]
       local offset = (a > b and a) or b
       local width = ((ico_size / 2) + offset) * 2
 
-      if
-        compare_size == 64 and base.icon_size == 64 and base.scale == nil and icon.icon_size == 32 and icon.scale == nil
-       then
-        log(obj.name .. ": Icon edge case detected, overriding compare size from 64 to 32")
-        compare_size = 32
-      end
-
       if width > compare_size then
-        compare_size = (width / compare_size) * 32
+        compare_size = (width / size) * 32
       end
     end
   end
 
-  if always_emit or compare_size ~= size then
+  if compare_size ~= size then
+    -- log(obj.name .. ": " .. compare_size)
+    -- for _, i in pairs(obj.icons) do
+    --   log(
+    --     "icon: " ..
+    --       i.icon ..
+    --         ", mips: " ..
+    --           (i.icon_mipmaps or "nil") ..
+    --             ", size: " ..
+    --               (i.icon_size or "nil") ..
+    --                 ", scale: " ..
+    --                   (i.scale or "nil") .. ", shift: " .. ((i.shift and (i.shift[1] .. "|" .. i.shift[2])) or "nil")
+    --   )
+    -- end
     return compare_size
   else
     return nil

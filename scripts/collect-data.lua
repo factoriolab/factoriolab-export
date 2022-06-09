@@ -30,6 +30,11 @@ local function process_recipes(recipes_unlocked)
     -- Skip recipes that don't have outputs
     if not recipe.products or not (#recipe.products > 0) then
       include = false
+    else
+      local out, catalyst, total = utils.calculate_products(recipe.products)
+      if total == 0 then
+        include = false
+      end
     end
 
     -- Always include fixed recipes (that do have outputs)

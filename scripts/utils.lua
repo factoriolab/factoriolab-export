@@ -72,4 +72,37 @@ function utils.get_order_info(key)
   end
 end
 
+function utils.calculate_ingredients(ingredients)
+  local lab_in = {}
+  for _, ingredient in pairs(ingredients) do
+    lab_in[ingredient.name] = ingredient.amount
+  end
+  return lab_in
+end
+
+function utils.calculate_products(products)
+  local lab_out = {}
+  local lab_catalyst
+  local total = 0
+  for _, product in pairs(products) do
+    local amount = product.amount
+    if not amount then
+      amount = (product.amount_max + product.amount_min) / 2
+    end
+    if product.probability then
+      amount = amount * product.probability
+    end
+    total = total + amount
+    lab_out[product.name] = amount
+
+    if product.catalyst_amount then
+      if not lab_catalyst then
+        lab_catalyst = {}
+      end
+      lab_catalyst[product.name] = product.catalyst_amount
+    end
+  end
+  return lab_out, lab_catalyst, total
+end
+
 return utils

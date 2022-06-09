@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.4
+Date: 2022-06-08
+  Changed:
+    - Include catalyst_amount in recipe data
+  Fixed:
+    - Improved calculation of icon overflow to catch additional cases
+    - Added check for duplicate icon ids when creating category icons
+    - Added check to exclude recipes with products whose amounts total to zero
+---------------------------------------------------------------------------------------------------
 Version: 1.0.3
 Date: 2022-06-06
   Changed:
