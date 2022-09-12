@@ -3,6 +3,9 @@ Version: 1.0.5
 Date: 2022-09-12
   Changed:
     - Include recipe categories and sort recipes by category
+    - Updated step 5 of README on adding a data set to include adding mod `id` to the hash
+  Removed:
+    - Removed `color` field from icon data
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2022-06-08

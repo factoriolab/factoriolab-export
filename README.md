@@ -25,6 +25,7 @@ This mod works best when run in Instrument Mode. [Learn more](#why-instrument-mo
    - These folders use a three-letter abbreviation for brevity when used in the URL, or a combination of three-letter abbreviations if multiple mod sets are included (e.g. `bobang` for Bob's and Angel's)
 1. Add an entry for this mod set in `factoriolab\src\data\index.ts`
    - This should include the folder name as the `id`, a friendly name as the `name`, and `game: Game.Factorio`
+   - Also add the `id` of the mod to the end of the `hash` array in the same file
 1. Double check the `defaults` object in `data.json` to ensure reasonable defaults are used for this data set
 1. In the FactorioLab repository, run the command `npm run process-mod abc` where `abc` is the folder name you chose for the data
    - This command adds the average color to each icon in the data set, which is used in the Flow view

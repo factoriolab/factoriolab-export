@@ -801,14 +801,12 @@ return function(player_index, language_data)
     )
     local lab_icon = {
       id = icon.name,
-      color = "#000000",
       position = string.format("%spx %spx", x > 0 and (x / 2) * -64 or 0, y > 0 and (y / 2) * -64 or 0)
     }
     table.insert(lab_icons, lab_icon)
     for _, copy in pairs(icon.copies) do
       local lab_icon_copy = {
         id = copy,
-        color = "#000000",
         position = lab_icon.position
       }
       table.insert(lab_icons, lab_icon_copy)
