@@ -12,6 +12,7 @@ local function process_technology()
       end
     end
   end
+
   return recipes_unlocked
 end
 
@@ -95,30 +96,84 @@ local function process_items(recipes_enabled)
   return items_used
 end
 
-local function sort_items(items_used)
-  local items_list = {}
+local function sort_protos(items_used, recipes_enabled)
+  local proto_list = {}
   for name, _ in pairs(items_used) do
-    local item = game.item_prototypes[name] or game.fluid_prototypes[name]
+    local item = game.item_prototypes[name]
+    if item then
+      table.insert(
+        proto_list,
+        {
+          item = item,
+          fluid = nil,
+          recipe = nil,
+          name = item.name,
+          order = item.order,
+          sgname = item.subgroup.name,
+          sgorder = item.subgroup.order,
+          gname = item.group.name,
+          gorder = item.group.order
+        }
+      )
+    end
+
+    local fluid = game.fluid_prototypes[name]
+    if fluid then
+      table.insert(
+        proto_list,
+        {
+          item = nil,
+          fluid = fluid,
+          recipe = nil,
+          name = fluid.name,
+          order = fluid.order,
+          sgname = fluid.subgroup.name,
+          sgorder = fluid.subgroup.order,
+          gname = fluid.group.name,
+          gorder = fluid.group.order
+        }
+      )
+    end
+  end
+
+  for name, recipe in pairs(recipes_enabled) do
     table.insert(
-      items_list,
-      {item, item.name, item.order, item.subgroup.name, item.subgroup.order, item.group.name, item.group.order}
+      proto_list,
+      {
+        item = nil,
+        fluid = nil,
+        recipe = recipe,
+        name = recipe.name,
+        order = recipe.order,
+        sgname = recipe.subgroup.name,
+        sgorder = recipe.subgroup.order,
+        gname = recipe.group.name,
+        gorder = recipe.group.order
+      }
     )
   end
 
-  utils.sort_by(items_list, 7, 6, 5, 4, 3, 2)
+  utils.sort_by(proto_list, "gorder", "gname", "sgorder", "sgname", "order", "name")
 
-  local sorted_item_names = {}
-  for i = 1, #items_list do
-    table.insert(sorted_item_names, items_list[i][2])
+  local sorted_protos = {}
+  for i = 1, #proto_list do
+    local proto = proto_list[i]
+    table.insert(
+      sorted_protos,
+      {
+        item = proto.item,
+        fluid = proto.fluid,
+        recipe = proto.recipe
+      }
+    )
   end
-  return sorted_item_names
+
+  return sorted_protos
 end
 
 return function()
   local recipes_unlocked = process_technology()
   local recipes_enabled = process_recipes(recipes_unlocked)
   local items_used = process_items(recipes_enabled)
-  local sorted_item_names = sort_items(items_used)
-
-  return sorted_item_names, recipes_enabled
+  return sort_protos(items_used, recipes_enabled)
 end

@@ -6,6 +6,7 @@ local function convert_emissions(emissions, energy)
   if not emissions or not energy then
     return nil
   end
+
   return emissions * energy * 1000 * 60
 end
 
@@ -13,6 +14,7 @@ local function get_fuel_category(entity)
   for fuel_category, _ in pairs(entity.burner_prototype.fuel_categories) do
     return fuel_category
   end
+
   return nil
 end
 
@@ -38,6 +40,7 @@ function entity_utils.get_powered_entity(entity, warn_player)
       -- TODO: Allow multiple fuel categories
       warn_player({"factoriolab-export.warn-multiple-fuel-categories", entity.name})
     end
+
     energy_type = "burner"
     fuel_category = get_fuel_category(entity)
     pollution = convert_emissions(entity.burner_prototype.emissions, energy_usage)
@@ -78,6 +81,7 @@ function entity_utils.launch_ticks(entity)
   for _, ticks_taken in pairs(launch_steps) do
     ticks = ticks + ticks_taken
   end
+
   ticks = math.floor(ticks + 0.5)
 
   return ticks
@@ -88,6 +92,7 @@ local function add_producers(name, categories, producers)
     if not producers[category] then
       producers[category] = {}
     end
+
     table.insert(producers[category], name)
   end
 end
@@ -96,12 +101,15 @@ function entity_utils.process_producers(name, entity, producers)
   if entity.resource_categories then
     add_producers(name, entity.resource_categories, producers.resource)
   end
+
   if entity.crafting_categories then
     add_producers(name, entity.crafting_categories, producers.crafting)
   end
+
   if entity.burner_prototype and entity.burner_prototype.fuel_categories then
     add_producers(name, entity.burner_prototype.fuel_categories, producers.burner)
   end
+
   if entity.type == "lab" then
     table.insert(producers.labs, name)
   elseif entity.type == "rocket-silo" then

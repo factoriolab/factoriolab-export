@@ -24,6 +24,7 @@ function utils.sort_by(t, n1, n2, n3, n4, n5, n6)
         end
       end
     end
+
     return false
   end
 
@@ -41,6 +42,7 @@ function utils.convert_energy(energy)
   if not energy then
     return nil
   end
+
   return energy / 1000 * 60
 end
 
@@ -50,6 +52,7 @@ function utils.to_table(array)
   for _, obj in pairs(array) do
     table[obj.id] = obj.name
   end
+
   return table
 end
 
@@ -59,6 +62,7 @@ function utils.get_order_info(key)
   if noise_layer == nil then
     return nil, nil
   end
+
   local hash_id, size = string.match(noise_layer.order, "^(.+)|(.+)$")
   if hash_id and size then
     return tonumber(hash_id), 64 / tonumber(size)
@@ -77,6 +81,7 @@ function utils.calculate_ingredients(ingredients)
   for _, ingredient in pairs(ingredients) do
     lab_in[ingredient.name] = ingredient.amount
   end
+
   return lab_in
 end
 
@@ -89,9 +94,11 @@ function utils.calculate_products(products)
     if not amount then
       amount = (product.amount_max + product.amount_min) / 2
     end
+
     if product.probability then
       amount = amount * product.probability
     end
+
     total = total + amount
     lab_out[product.name] = amount
 
@@ -99,9 +106,11 @@ function utils.calculate_products(products)
       if not lab_catalyst then
         lab_catalyst = {}
       end
+
       lab_catalyst[product.name] = product.catalyst_amount
     end
   end
+
   return lab_out, lab_catalyst, total
 end
 
