@@ -2,7 +2,7 @@
 
 This is the repository for [FactorioLab Export](https://mods.factorio.com/mod/factoriolab-export), a [Factorio](https://www.factorio.com/) mod that logs game data to JSON files and an icon sprite sheet that can be used by [FactorioLab](https://factoriolab.github.io).
 
-After following the steps in [getting started](#getting-started), you can use this mod to [create a new data set](#creating-a-new-data-set), [update an existing data set](#updating-an-existing-data-set), or [localize a data set](#localize-a-new-or-existing-data-set).
+After following the steps in [getting started](#getting-started), you can use this mod to [create a new data set](#creating-a-new-data-set), [update an existing data set](#updating-an-existing-data-set), or [localize a data set](#localizing-a-data-set).
 
 This mod works best when run in Instrument Mode. [Learn more](#why-instrument-mode)
 
@@ -25,9 +25,8 @@ This mod works best when run in Instrument Mode. [Learn more](#why-instrument-mo
    - These folders use a three-letter abbreviation for brevity when used in the URL, or a combination of three-letter abbreviations if multiple mod sets are included (e.g. `bobang` for Bob's and Angel's)
 1. Add an entry for this mod set in `factoriolab\src\data\index.ts`
    - This should include the folder name as the `id`, a friendly name as the `name`, and `game: Game.Factorio`
+   - Also add the `id` of the mod to the end of the `hash` array in the same file
 1. Double check the `defaults` object in `data.json` to ensure reasonable defaults are used for this data set
-1. In the FactorioLab repository, run the command `npm run process-mod abc` where `abc` is the folder name you chose for the data
-   - This command adds the average color to each icon in the data set, which is used in the Flow view
 1. Run the application and load the data set, then refresh the page
 1. If the calculator fails to find a solution within five seconds, update the `disabledRecipes` in `defaults`
    - A suggested default for this will also be logged to the browser console
@@ -41,8 +40,6 @@ This mod works best when run in Instrument Mode. [Learn more](#why-instrument-mo
 1. Copy **only** `data.json` and `icons.png` to the appropriate folder in the [FactorioLab](https://github.com/factoriolab/factoriolab) repository under `src\data`
    - **Do not** copy `hash.json`, overwriting the old file would break existing saved links
 1. Double check the `defaults` object in `data.json`, or copy the `defaults` from the original data set if it is still valid
-1. In the FactorioLab repository, run the command `npm run process-mod abc` where `abc` is the folder name for the data
-   - This command adds the average color to each icon in the data set, which is used in the Flow view
 1. Run the application and load the data set, then refresh the page
    - An object will be logged to the browser console indicating the new `hash` for this data set
    - Copy that object and overwrite the existing `hash.json` for this data set, this should only append ids
@@ -78,7 +75,7 @@ FactorioLab Export checks for a few edge cases that do not currently work well w
 1. > [FLE] Skipping recipe `id`, failed to find producers
    - FactorioLab Export couldn't find any factories that allow this recipe
    - This most commonly occurs when the mod attempts to generate a recipe to generate the burnt result of a fuel, but the fuel is only allowed in entities like trains that cannot be used as producers in FactorioLab
-1. > [FLE] Failed to find fuel or item prototype for recipe product/ingredient `id`
+1. > [FLE] Failed to find fluid or item prototype for recipe product/ingredient `id`
    - This indicates a problem where a product or ingredient could not be found in the list of `game.item_prototypes` or `game.fluid_prototypes`
 1. > [FLE] Failed to find appropriate tech to represent infinite research, looking for `id`
    - FactorioLab Export includes recipes for infinite technologies, and attempts to create a category for these based on the `space-science-pack` technology
