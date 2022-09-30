@@ -119,4 +119,25 @@ function entity_utils.process_producers(name, entity, producers)
   end
 end
 
+function entity_utils.disallowEffects(entity, warn_player)
+  if entity.module_inventory_size == nil or entity.module_inventory_size == 0 then
+    -- Don't need this property, we already know none are allowed
+    return nil
+  end
+
+  local disallowEffects = {}
+  for effect, allow in pairs(entity.allowed_effects) do
+    if allow == false then
+      table.insert(disallowEffects, effect)
+    end
+  end
+
+  if #disallowEffects > 0 then
+    -- Only return list if it actually contains entries
+    return disallowEffects
+  else
+    return nil
+  end
+end
+
 return entity_utils

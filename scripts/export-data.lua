@@ -24,19 +24,20 @@ local function add_icon(hash_id, name, scale, sprite, icons)
   end
 end
 
-local function check_recipe_name(recipes, desired_id, backup_id, icons)
-  for _, recipe in pairs(recipes) do
-    if recipe.id == desired_id then
-      for _, icon in pairs(icons) do
-        if icon.name == recipe.id then
-          table.insert(icon.copies, backup_id)
-          break
-        end
+local function check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
+  if recipe_id_claimed[desired_id] then
+    for _, icon in pairs(icons) do
+      if icon.name == desired_id then
+        table.insert(icon.copies, backup_id)
+        break
       end
-
-      return backup_id
     end
+
+    recipe_id_claimed[backup_id] = true
+    return backup_id
   end
+
+  recipe_id_claimed[desired_id] = true
   return desired_id
 end
 
@@ -82,7 +83,7 @@ end
 local last_item_row, last_item_col, last_item_group, last_item_subgroup = 0, 0
 local function get_item_row(item)
   if item.group == last_item_group then
-    if item.subgroup ~= last_item_subgroup or last_item_col == 10 then
+    if item.subgroup ~= last_item_subgroup then
       last_item_row = last_item_row + 1
       last_item_col = 0
     end
@@ -101,7 +102,7 @@ end
 local last_recipe_row, last_recipe_col, last_recipe_group, last_recipe_subgroup = 0, 0
 local function get_recipe_row(recipe)
   if recipe.group == last_recipe_group then
-    if recipe.subgroup ~= last_recipe_subgroup or last_recipe_col == 10 then
+    if recipe.subgroup ~= last_recipe_subgroup then
       last_recipe_row = last_recipe_row + 1
       last_recipe_col = 0
     end
@@ -168,6 +169,9 @@ return function(player_index, language_data)
   local limitations_cache = {}
   local groups_used = {}
   local icons = {}
+  local recipe_id_claimed = {}
+  local boiler_entities = {}
+  local offshore_pump_entities = {}
 
   -- Defaults
   local lab_default_beacon
@@ -230,6 +234,7 @@ return function(player_index, language_data)
           lab_item.beacon = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.beacon.effectivity = entity.distribution_effectivity
           lab_item.beacon.modules = entity.module_inventory_size
+          lab_item.beacon.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.beacon.range = entity.supply_area_distance
           if not lab_default_beacon then
             lab_default_beacon = name
@@ -240,6 +245,7 @@ return function(player_index, language_data)
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.mining = true
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = entity.mining_speed
           if entity.resource_categories["basic-solid"] then
             local is_electric = lab_item.factory.type == "electric"
@@ -250,14 +256,17 @@ return function(player_index, language_data)
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "offshore-pump" then
+          table.insert(offshore_pump_entities, entity)
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = entity.pumping_speed * 60
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "furnace" or entity.type == "assembling-machine" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = entity.crafting_speed
           local is_electric = lab_item.factory.type == "electric"
           if entity.type == "assembling-machine" then
@@ -277,13 +286,16 @@ return function(player_index, language_data)
         elseif entity.type == "lab" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.research = true
           lab_item.factory.speed = entity.researching_speed
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "boiler" then
+          table.insert(boiler_entities, entity)
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = lab_item.factory.usage -- Speed is based on usage
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
@@ -291,6 +303,7 @@ return function(player_index, language_data)
           -- TODO: Account for launch animation energy usage spike
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = entity.crafting_speed
           lab_item.factory.silo = {
             parts = entity.rocket_parts_required,
@@ -300,7 +313,8 @@ return function(player_index, language_data)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "reactor" then
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
-          lab_item.factory.modules = 0
+          lab_item.factory.modules = entity.module_inventory_size
+          lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
           lab_item.factory.speed = 1
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
@@ -387,6 +401,7 @@ return function(player_index, language_data)
       local hash_id, scale = utils.get_order_info("item/" .. name)
       add_icon(hash_id, name, scale or 2, "item/" .. name, icons)
     end
+
     if proto.fluid then
       local fluid = proto.fluid
       local name = fluid.name
@@ -406,6 +421,10 @@ return function(player_index, language_data)
       else
         player.print({"factoriolab-export.error-no-item-prototype", item.name}, color_error)
       end
+    end
+
+    if proto.recipe then
+      recipe_id_claimed[proto.recipe.name] = true
     end
   end
 
@@ -465,7 +484,7 @@ return function(player_index, language_data)
           groups_used[item.group.name] = item.group
           local desired_id = launch_item.item.rocket_launch_products[1].name
           local backup_id = silo_name .. "-" .. launch_item.item.name .. "-launch"
-          local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
+          local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
           local lab_in = {[launch_item.item.name] = 1}
           local lab_part
           local fixed_recipe_outputs = utils.calculate_products(game.recipe_prototypes[silo.fixed_recipe].products)
@@ -498,7 +517,7 @@ return function(player_index, language_data)
         groups_used[item.group.name] = item.group
         local desired_id = item.burnt_result.name
         local backup_id = name .. "-burn"
-        local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
+        local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
         lab_recipe = {
           id = id,
           name = item_names[name] .. " : " .. item_names[item.burnt_result.name],
@@ -519,20 +538,20 @@ return function(player_index, language_data)
       local item = proto.fluid
       local name = item.name
 
-      for entity_name, entity in pairs(game.entity_prototypes) do
+      for _, pump in pairs(offshore_pump_entities) do
         -- Check for pump recipe(s)
-        if entity.type == "offshore-pump" and entity.fluid.name == name then
+        if pump.fluid.name == name then
           groups_used[item.group.name] = item.group
           local desired_id = name
-          local backup_id = entity.name .. "-" .. name .. "-pump"
-          local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
+          local backup_id = pump.name .. "-" .. name .. "-pump"
+          local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
           local lab_recipe = {
             id = id,
-            name = item_names[entity.name] .. " : " .. fluid_names[name],
+            name = item_names[pump.name] .. " : " .. fluid_names[name],
             time = 1,
             ["in"] = {},
             out = {[name] = 1},
-            producers = {entity.name},
+            producers = {pump.name},
             cost = 100,
             row = get_recipe_row(item),
             category = item.group.name
@@ -541,28 +560,29 @@ return function(player_index, language_data)
           table.insert(lab_hash_recipes, id)
           safe_add_recipe_items(lab_recipe, lab_hash_items)
         end
+      end
 
-        -- Check for boiler recipes, if item is steam
-        if entity.type == "boiler" and name == "steam" then
+      if name == "steam" then
+        for _, boiler in pairs(boiler_entities) do
           local water = game.fluid_prototypes["water"]
           if water then
             -- TODO: Account for different steam temperatures
-            if entity.target_temperature == 165 then
+            if boiler.target_temperature == 165 then
               groups_used[item.group.name] = item.group
               local desired_id = name
-              local backup_id = entity.name .. "-" .. name .. "-boil"
-              local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
+              local backup_id = boiler.name .. "-" .. name .. "-boil"
+              local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
 
               local temp_diff = 165 - 15
               local energy_reqd = temp_diff * water.heat_capacity / 1000
 
               local lab_recipe = {
                 id = id,
-                name = item_names[entity.name] .. " : " .. fluid_names[name],
+                name = item_names[boiler.name] .. " : " .. fluid_names[name],
                 time = energy_reqd,
                 ["in"] = {[water.name] = 1},
                 out = {[name] = 1},
-                producers = {entity.name},
+                producers = {boiler.name},
                 row = get_recipe_row(item),
                 category = item.group.name
               }
@@ -587,7 +607,7 @@ return function(player_index, language_data)
           groups_used[item.group.name] = item.group
           local desired_id = name
           local backup_id = name .. "-mining"
-          local id = check_recipe_name(lab_recipes, desired_id, backup_id, icons)
+          local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
           local lab_in = {}
           if entity.mineable_properties.required_fluid then
             local amount = entity.mineable_properties.fluid_amount / 10
@@ -663,7 +683,7 @@ return function(player_index, language_data)
     if tech.research_unit_count_formula then
       local desired_id = name
       local backup_id = name .. "-technology"
-      local id = check_recipe_name(lab_recipes, desired_id, backup_id, {})
+      local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, {})
       local hash_id, scale = utils.get_order_info("technology/" .. name)
       add_icon(hash_id, id, scale or 0.25, "technology/" .. name, icons)
       local lab_item = {
