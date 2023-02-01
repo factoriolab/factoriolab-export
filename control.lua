@@ -4,7 +4,7 @@ local event = require("__flib__.event")
 local export_data = require("scripts/export-data")
 
 local function create_dictionaries()
-  for _, type in pairs({"entity", "fluid", "item", "item_group", "recipe", "technology"}) do
+  for _, type in pairs({"fluid", "item", "item_group", "recipe", "technology"}) do
     -- If the object's name doesn't have a translation, use its internal name as the translation
     local Names = dictionary.new(type .. "_names", true)
     for name, prototype in pairs(game[type .. "_prototypes"]) do

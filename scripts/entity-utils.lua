@@ -110,8 +110,12 @@ function entity_utils.process_producers(name, entity, producers)
     add_producers(name, entity.burner_prototype.fuel_categories, producers.burner)
   end
 
-  if entity.type == "lab" then
+  if entity.type == "boiler" then
+    producers.boilers[name] = entity
+  elseif entity.type == "lab" then
     table.insert(producers.labs, name)
+  elseif entity.type == "offshore-pump" then
+    producers.offshore_pumps[name] = entity
   elseif entity.type == "rocket-silo" then
     if entity.fixed_recipe then
       producers.silos[name] = entity

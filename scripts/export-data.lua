@@ -163,15 +163,17 @@ return function(player_index, language_data)
     resource = {},
     -- list of names
     labs = {},
-    -- list of entities
-    silos = {}
+    -- dictionary of name -> entity
+    silos = {},
+    -- dictionary of name -> entity
+    boilers = {},
+    -- dictionary of name -> entity
+    offshore_pumps = {},
   }
   local limitations_cache = {}
   local groups_used = {}
   local icons = {}
   local recipe_id_claimed = {}
-  local boiler_entities = {}
-  local offshore_pump_entities = {}
 
   -- Defaults
   local lab_default_beacon
@@ -256,7 +258,6 @@ return function(player_index, language_data)
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "offshore-pump" then
-          table.insert(offshore_pump_entities, entity)
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
@@ -292,7 +293,6 @@ return function(player_index, language_data)
           entity_utils.process_producers(name, entity, producers)
           table.insert(lab_hash_factories, name)
         elseif entity.type == "boiler" then
-          table.insert(boiler_entities, entity)
           lab_item.factory = entity_utils.get_powered_entity(entity, warn_player)
           lab_item.factory.modules = entity.module_inventory_size
           lab_item.factory.disallowEffects = entity_utils.disallowEffects(entity, warn_player)
@@ -538,7 +538,7 @@ return function(player_index, language_data)
       local item = proto.fluid
       local name = item.name
 
-      for _, pump in pairs(offshore_pump_entities) do
+      for pump_name, pump in pairs(producers.offshore_pumps) do
         -- Check for pump recipe(s)
         if pump.fluid.name == name then
           groups_used[item.group.name] = item.group
@@ -547,11 +547,11 @@ return function(player_index, language_data)
           local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
           local lab_recipe = {
             id = id,
-            name = item_names[pump.name] .. " : " .. fluid_names[name],
+            name = item_names[pump_name] .. " : " .. fluid_names[name],
             time = 1,
             ["in"] = {},
             out = {[name] = 1},
-            producers = {pump.name},
+            producers = {pump_name},
             cost = 100,
             row = get_recipe_row(item),
             category = item.group.name
@@ -563,14 +563,14 @@ return function(player_index, language_data)
       end
 
       if name == "steam" then
-        for _, boiler in pairs(boiler_entities) do
+        for boiler_name, boiler in pairs(producers.boilers) do
           local water = game.fluid_prototypes["water"]
           if water then
             -- TODO: Account for different steam temperatures
             if boiler.target_temperature == 165 then
               groups_used[item.group.name] = item.group
               local desired_id = name
-              local backup_id = boiler.name .. "-" .. name .. "-boil"
+              local backup_id = boiler_name .. "-" .. name .. "-boil"
               local id = check_recipe_name(recipe_id_claimed, desired_id, backup_id, icons)
 
               local temp_diff = 165 - 15
@@ -578,11 +578,11 @@ return function(player_index, language_data)
 
               local lab_recipe = {
                 id = id,
-                name = item_names[boiler.name] .. " : " .. fluid_names[name],
+                name = item_names[boiler_name] .. " : " .. fluid_names[name],
                 time = energy_reqd,
                 ["in"] = {[water.name] = 1},
                 out = {[name] = 1},
-                producers = {boiler.name},
+                producers = {boiler_name},
                 row = get_recipe_row(item),
                 category = item.group.name
               }
