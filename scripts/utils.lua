@@ -100,7 +100,12 @@ function utils.calculate_products(products)
     end
 
     total = total + amount
+
+    if lab_out[product.name] then
+      lab_out[product.name] = lab_out[product.name] + amount
+    else
     lab_out[product.name] = amount
+    end
 
     if product.catalyst_amount then
       if not lab_catalyst then
