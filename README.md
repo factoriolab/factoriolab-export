@@ -1,4 +1,6 @@
-# FactorioLab Export
+# FactorioLab Export (Deprecated)
+
+**NOTE: This project has been deprecated, in favor of npm scripts inside the factoriolab repository itself. This tool is no longer maintained and will not generate data sets that work with the latest versions of FactorioLab.**
 
 This is the repository for [FactorioLab Export](https://mods.factorio.com/mod/factoriolab-export), a [Factorio](https://www.factorio.com/) mod that logs game data to JSON files and an icon sprite sheet that can be used by [FactorioLab](https://factoriolab.github.io).
 
