@@ -1,5 +1,5 @@
-local noise_layers = {} -- Use fake noise layers to store sprite info
-local prefix = "factoriolab-export/"
+local custom_events = {} -- Use fake custom events to store sprite info
+local prefix = "factoriolab-export_"
 
 local icon_hash, icon_hash_id = {}, 0
 local function get_icon_hash(obj)
@@ -39,7 +39,7 @@ local function check_overflow(obj)
     return nil
   end
   local base = obj.icons[1]
-  local size = (base.icon_size or obj.icon_size) * (base.scale or 1)
+  local size = (base.icon_size or obj.icon_size or 64) * (base.scale or 1)
   if base.icon_size == 64 and base.scale == nil then
     size = 32
   end
@@ -47,7 +47,7 @@ local function check_overflow(obj)
 
   for _, icon in pairs(obj.icons) do
     if icon.shift then
-      local ico_size = (icon.icon_size or obj.icon_size) * (icon.scale or 1)
+      local ico_size = (icon.icon_size or obj.icon_size or 64) * (icon.scale or 1)
       if icon.icon_size == 64 and icon.scale == nil then
         ico_size = 32
       end
@@ -86,6 +86,7 @@ local function check_size(key, store_as)
   raw = data.raw[key]
   for _, obj in pairs(raw) do
     local order = get_icon_hash(obj)
+    order = tostring(order)
     local size = check_overflow(obj)
     if not size and obj.icons and obj.icons[1].scale == 1 then
       size = obj.icons[1].icon_size
@@ -93,8 +94,9 @@ local function check_size(key, store_as)
     if size then
       order = order .. "|" .. size
     end
-    local name = prefix .. (store_as or key) .. "/" .. obj.name
-    table.insert(noise_layers, {name = name, order = order, type = "noise-layer"})
+    local name = prefix .. (store_as or key) .. "_" .. obj.name
+    order = tostring(order)
+    table.insert(custom_events, {name = name, order = order, type = "custom-event"})
   end
 end
 
@@ -102,13 +104,14 @@ local function check_size_alt(key)
   raw = data.raw[key]
   for _, obj in pairs(raw) do
     local order = get_icon_hash(obj)
+    order = tostring(order)
     if obj.icons and obj.icons[1].icon_size then
       order = order .. "|" .. (obj.icons[1].icon_size * (obj.icons[1].scale or 1))
     else
       order = order .. "|" .. obj.icon_size
     end
-    local name = prefix .. key .. "/" .. obj.name
-    table.insert(noise_layers, {name = name, order = order, type = "noise-layer"})
+    local name = prefix .. key .. "_" .. obj.name
+    table.insert(custom_events, {name = name, order = order, type = "custom-event"})
   end
 end
 
@@ -128,4 +131,4 @@ check_size("recipe")
 check_size_alt("item-group")
 check_size_alt("technology")
 
-data:extend(noise_layers)
+data:extend(custom_events)

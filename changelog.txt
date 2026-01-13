@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.7
+Date: yyyy-mm-dd
+  Changed:
+    - Updated to work with FactorioLab 4.x
+---------------------------------------------------------------------------------------------------
+Version: 1.0.7
 Date: 2023-02-16
   Fixed:
     - Resolved an issue where duplicate products were not correctly summed
