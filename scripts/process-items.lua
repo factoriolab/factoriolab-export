@@ -43,10 +43,10 @@ return function()
       item.belt = {speed = proto.belt_speed * 8 * 60}
     elseif proto.type == "pump" then
       local item = item_map[name] or entity_utils.item(state, localised_strings, proto)
-      item.pipe = {speed = proto.get_pumping_speed() * 60}
+      item.pipe = entity_utils.pump(proto)
     elseif proto.type == "agricultural-tower" then
       local item = item_map[name] or entity_utils.item(state, localised_strings, proto)
-      item.machine = {} --TODO
+      item.machine = entity_utils.agricultural_tower(proto)
     elseif proto.type == "assembling-machine" then
       local item = item_map[name] or entity_utils.item(state, localised_strings, proto)
       item.machine = {} --TODO

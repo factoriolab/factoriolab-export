@@ -1,13 +1,17 @@
 local process_collection = require("process-collection")
+local process_qualities = require("process-qualities")
 local state = require("state")
 local translate_collection = require("translate-collection")
-local write_icons = require("write-icons")
 
 return function()
   log("init process_locations")
   local localised_strings = {}
 
   local function process_space_location(name, proto)
+    if proto.type ~= "planet" then
+      return
+    end
+
     local sprite = "space-location/" .. name
     table.insert(state.data.locations, {id = name, icon = sprite})
     table.insert(state.icons, {sprite = sprite, scale = 2})
@@ -22,7 +26,7 @@ return function()
   end
 
   local function finalize_surfaces()
-    translate_collection(state.player, localised_strings, state.data.locations, write_icons)
+    translate_collection(state.player, localised_strings, state.data.locations, process_qualities)
     script.on_event(defines.events.on_tick, nil)
   end
 
