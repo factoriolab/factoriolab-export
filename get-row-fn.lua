@@ -1,6 +1,4 @@
-utils = {}
-
-function utils.get_row_fn()
+return function()
   local last_row, last_group, last_subgroup = 0
   return function(obj)
     if obj.group == last_group then
@@ -16,13 +14,3 @@ function utils.get_row_fn()
     return last_row
   end
 end
-
-function utils.convert_emissions(emissions, energy)
-  return emissions and energy and emissions * energy * 1000 * 60 or nil
-end
-
-function utils.convert_energy(energy)
-  return energy and energy / 1000 * 60 or nil
-end
-
-return utils

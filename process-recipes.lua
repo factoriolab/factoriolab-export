@@ -1,13 +1,13 @@
+local get_row_fn = require("get-row-fn")
 local process_collection = require("process-collection")
-local process_locations = require("process-locations")
 local state = require("state")
 local translate_collection = require("translate-collection")
-local utils = require("utils")
+local process_locations = require("process-locations")
 
 return function()
   log("init process_recipes")
   local localised_strings = {}
-  local recipe_row = utils.get_row_fn()
+  local recipe_row = get_row_fn()
 
   local function process_recipe(name, proto)
     local sprite = "recipe/" .. name
@@ -17,7 +17,11 @@ return function()
         id = name,
         icon = sprite,
         row = recipe_row(proto),
-        category = proto.group.name
+        category = proto.group.name,
+        time = proto.energy,
+        producers = {"assembling-machine-1"}, -- TODO
+        ["in"] = {},
+        ["out"] = {}
       }
     )
     table.insert(state.icons, {sprite = sprite, scale = 2})

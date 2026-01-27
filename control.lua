@@ -1,5 +1,5 @@
-local process_categories = require("scripts/process-categories")
-local state = require("scripts/state")
+local process_categories = require("process-categories")
+local state = require("state")
 
 local function setup()
   log("init setup")

@@ -21,5 +21,12 @@ state.data = {
   locations = {}
 }
 state.icons = {}
+state.abnormal_qualities = {}
+
+for name, quality in pairs(prototypes.quality) do
+  if quality.level > 0 then
+    state.abnormal_qualities[name] = quality
+  end
+end
 
 return state

@@ -1,4 +1,4 @@
-local state = require("scripts/state")
+local state = require("state")
 
 return function()
   log("init write_data")

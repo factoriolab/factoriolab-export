@@ -1,7 +1,7 @@
 local process_collection = require("process-collection")
-local process_items = require("process-items")
 local state = require("state")
 local translate_collection = require("translate-collection")
+local process_items = require("process-items")
 
 return function()
   log("init process_categories")

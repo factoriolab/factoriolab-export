@@ -1,7 +1,7 @@
 local process_collection = require("process-collection")
-local process_qualities = require("process-qualities")
 local state = require("state")
 local translate_collection = require("translate-collection")
+local process_qualities = require("process-qualities")
 
 return function()
   log("init process_locations")
