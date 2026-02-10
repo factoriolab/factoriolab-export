@@ -133,7 +133,7 @@ function utils.is_crafting_machine(entity)
   return entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "rocket-silo"
 end
 
-function utils.modules(entity, quality)
+function modules(entity, quality)
   if quality and entity.quality_affects_module_slots then
     if quality.beacon_module_slots_bonus and entity.type == "beacon" then
       return entity.module_inventory_size + quality.beacon_module_slots_bonus
@@ -147,6 +147,11 @@ function utils.modules(entity, quality)
   end
 
   return entity.module_inventory_size
+end
+
+function utils.modules(entity, quality)
+  local result = modules(entity, quality)
+  return result > 0 and result or nil
 end
 
 function utils.has_ocean(planet, name)

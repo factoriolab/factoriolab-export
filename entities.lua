@@ -96,6 +96,22 @@ function entities.pipe(entity)
   return pipe
 end
 
+local function output_fluid(entity)
+  for _, fluid_box in ipairs(entity.fluidbox_prototypes) do
+    if fluid_box.filter and fluid_box.production_type == "output" then
+      return fluid_box.filter.name
+    end
+  end
+end
+
+local function input_fluid(entity)
+  for _, fluid_box in ipairs(entity.fluidbox_prototypes) do
+    if fluid_box.filter and fluid_box.production_type == "input" then
+      return fluid_box.filter.name
+    end
+  end
+end
+
 local function machine_speed(entity, quality)
   if utils.is_crafting_machine(entity) then
     return entity.get_crafting_speed(quality)
@@ -104,7 +120,14 @@ local function machine_speed(entity, quality)
   elseif entity.type == "mining-drill" then
     return entity.mining_speed or 1
   elseif entity.type == "offshore-pump" then
-    return entity.get_pumping_speed(quality)
+    return entity.get_pumping_speed(quality) * 60
+  elseif entity.type == "boiler" then
+    local usage = utils.usage(entity, quality)
+    local input = input_fluid(entity)
+    local fluid = prototypes.fluid[input]
+    local diff = entity.target_temperature - fluid.default_temperature
+    local energy = diff * fluid.heat_capacity / 1000
+    return usage / energy
   else
     return 1
   end
@@ -187,13 +210,9 @@ local function process_producers(entity, item)
   end
 
   if entity.type == "offshore-pump" then
-    local filter
-    for _, fluid_box in ipairs(entity.fluidbox_prototypes) do
-      if fluid_box.filter and fluid_box.production_type == "output" then
-        filter = fluid_box.filter
-      end
-    end
-    state.machines.offshore_pump[entity.name] = {id = item.id, filter = filter, speed = entity}
+    state.machines.offshore_pump[entity.name] = {id = item.id, output = output_fluid(entity)}
+  elseif entity.type == "boiler" then
+    state.machines.boiler[entity.name] = {id = item.id, output = output_fluid(entity), input = input_fluid(entity)}
   end
 end
 

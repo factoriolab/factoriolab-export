@@ -96,6 +96,9 @@ return function()
   end
 
   local function process_fluid(name, proto)
+    local item = state.item_map["fluid-" .. name]
+
+    -- Offshore pump recipes
     local locations = {}
     for surface_name, surface_proto in pairs(prototypes.space_location) do
       if utils.has_ocean(surface_proto, name) then
@@ -104,31 +107,62 @@ return function()
     end
 
     if #locations > 0 then
+      local producers = {}
       for entity_name, info in pairs(state.machines.offshore_pump) do
-        if not info.filter or info.filter == name then
-          local fluid_id = "fluid-" .. name
-          local item = state.item_map[fluid_id]
-          local recipe = {
-            id = "pump-" .. entity_name .. "-" .. name,
-            icon = item.icon,
-            row = recipe_row(proto),
-            category = proto.group.name,
-            time = 1,
-            ["in"] = {},
-            out = {[item.id] = 1},
-            producers = {info.id},
-            locations = locations,
-            name = item.name
-          }
-
-          table.insert(state.data.recipes, recipe)
+        if not info.output or info.output == name then
+          table.insert(producers, info.id)
         end
       end
+
+      if #producers > 0 then
+        local recipe = {
+          id = "offshore-pump-" .. name,
+          icon = item.icon,
+          row = recipe_row(proto),
+          category = proto.group.name,
+          time = 1,
+          ["in"] = {},
+          out = {[item.id] = 1},
+          producers = producers,
+          locations = locations,
+          name = item.name
+        }
+
+        table.insert(state.data.recipes, recipe)
+      end
+    end
+
+    -- Boiler recipes
+    local input_producers = {}
+    for entity_name, info in pairs(state.machines.boiler) do
+      if info.output == name and info.input then
+        if not input_producers[info.input] then
+          input_producers[info.input] = {}
+        end
+
+        table.insert(input_producers[info.input], info.id)
+      end
+    end
+
+    for input, producers in pairs(input_producers) do
+      local input_id = "fluid-" .. input
+      local recipe = {
+        id = "boiler-" .. name,
+        icon = item.icon,
+        row = recipe_row(proto),
+        category = proto.group.name,
+        time = 1,
+        ["in"] = {[input_id] = 1},
+        out = {[item.id] = 10},
+        producers = producers,
+        name = item.name
+      }
+
+      table.insert(state.data.recipes, recipe)
     end
   end
 
   -- TODO: Not-recipe recipes
-  -- Boiler recipes
   -- Rocket launch recipes
   -- Burn recipes
   -- Spoil recipes

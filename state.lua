@@ -32,6 +32,7 @@ state.producers = {
   agriculture = {}
 }
 state.machines = {
+  boiler = {},
   offshore_pump = {}
 }
 state.item_map = {}
