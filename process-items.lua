@@ -5,6 +5,7 @@ local process_collection = require("process-collection")
 local state = require("state")
 local translate_collection = require("translate-collection")
 local process_recipes = require("process-recipes")
+local technologies = require("technologies")
 
 return function()
   log("init process_items")
@@ -12,12 +13,10 @@ return function()
   local item_row = get_row_fn()
   local item_map = {}
 
-  -- TODO: Crawl resources
-
   local function process_item(name, proto)
     local sprite = "item/" .. name
     local item = {
-      id = name,
+      id = "item-" .. name,
       icon = sprite,
       row = item_row(proto),
       category = proto.group.name,
@@ -34,9 +33,9 @@ return function()
     if proto.type == "module" then
       item.module = items.module(proto)
     end
-    -- TODO: Check for fuel?
 
     table.insert(state.data.items, item)
+    state.item_map[item.id] = item
     item_map[name] = item
     table.insert(state.icons, {sprite = sprite, scale = 2})
     table.insert(localised_strings, proto.localised_name)
@@ -67,7 +66,7 @@ return function()
         proto.type == "rocket-silo"
      then
       local item = item_map[name] or entities.item(localised_strings, proto)
-      item.machine = entities.machine(proto)
+      item.machine = entities.machine(proto, item)
     elseif proto.type == "cargo-wagon" then
       local item = item_map[name] or entities.item(localised_strings, proto)
       item.cargoWagon = entities.cargo_wagon(proto)
@@ -82,31 +81,31 @@ return function()
 
   local function process_fluid(name, proto)
     local sprite = "fluid/" .. name
-    table.insert(
-      state.data.items,
-      {
-        id = name,
-        icon = sprite,
-        row = item_row(proto),
-        category = proto.group.name
-      }
-    )
+    local item = {
+      id = "fluid-" .. name,
+      icon = sprite,
+      row = item_row(proto),
+      category = proto.group.name
+    }
+    table.insert(state.data.items, item)
+    state.fluid_map[name] = item
     table.insert(state.icons, {sprite = sprite, scale = 2})
     table.insert(localised_strings, proto.localised_name)
   end
 
   local function process_technology(name, proto)
     local sprite = "technology/" .. name
-    -- TODO: Include technology info
     table.insert(
       state.data.items,
       {
-        id = name,
+        id = "technology-" .. name,
         icon = sprite,
         row = item_row(proto),
-        category = "technology"
+        category = "technology",
+        technology = technologies.technology(proto)
       }
     )
+
     table.insert(state.icons, {sprite = sprite, scale = 0.5})
     table.insert(localised_strings, proto.localised_name)
   end

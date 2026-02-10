@@ -6,12 +6,13 @@ local entities = {}
 function entities.item(localised_strings, entity)
   local sprite = "entity/" .. entity.name
   local item = {
-    id = entity.name,
+    id = "entity-" .. entity.name,
     icon = sprite,
     row = 0,
     category = "entity"
   }
   table.insert(state.data.items, item)
+  state.item_map[item.id] = item
   table.insert(state.icons, {sprite = sprite, scale = 2})
   table.insert(localised_strings, entity.localised_name)
   return item
@@ -102,6 +103,8 @@ local function machine_speed(entity, quality)
     return entity.get_researching_speed(quality) or 1
   elseif entity.type == "mining-drill" then
     return entity.mining_speed or 1
+  elseif entity.type == "offshore-pump" then
+    return entity.get_pumping_speed(quality)
   else
     return 1
   end
@@ -122,7 +125,23 @@ local function machine_fuel_categories(entity)
   return fuel_categories
 end
 
+local function pollution(energy_source, usage)
+  local result = energy_source.emissions_per_joule["pollution"] * usage * 60 * 60
+  return result > 0 and result or nil
+end
+
+local function machine_pollution(entity, quality)
+  local energy_source =
+    entity.electric_energy_source_prototype or entity.burner_prototype or entity.heat_energy_source_prototype or
+    entity.fluid_energy_source_prototype or
+    entity.void_energy_source_prototype
+  local usage = entity.get_max_energy_usage(quality)
+  local result = energy_source.emissions_per_joule["pollution"] * usage * 60 * 60
+  return result > 0 and result or nil
+end
+
 local function machine_silo(entity)
+  -- TODO
   return nil
 end
 
@@ -147,7 +166,39 @@ local function machine_ingredient_usage(entity)
   return percent / 100
 end
 
-function entities.machine(entity)
+local function add_producers(id, categories, type)
+  for category, _ in pairs(categories) do
+    if not state.producers[type][category] then
+      state.producers[type][category] = {id}
+    else
+      table.insert(state.producers[type][category], id)
+    end
+  end
+end
+
+local function process_producers(entity, item)
+  if entity.crafting_categories then
+    add_producers(item.id, entity.crafting_categories, "crafting")
+  elseif entity.resource_categories then
+    add_producers(item.id, entity.resource_categories, "resource")
+    if #entity.fluidbox_prototypes > 0 then
+      add_producers(item.id, entity.resource_categories, "resource_fluid")
+    end
+  end
+
+  if entity.type == "offshore-pump" then
+    local filter
+    for _, fluid_box in ipairs(entity.fluidbox_prototypes) do
+      if fluid_box.filter and fluid_box.production_type == "output" then
+        filter = fluid_box.filter
+      end
+    end
+    state.machines.offshore_pump[entity.name] = {id = item.id, filter = filter, speed = entity}
+  end
+end
+
+function entities.machine(entity, item)
+  local usage = utils.usage(entity)
   local machine = {
     speed = machine_speed(entity),
     modules = utils.modules(entity),
@@ -156,7 +207,7 @@ function entities.machine(entity)
     fuelCategories = machine_fuel_categories(entity),
     usage = utils.usage(entity),
     drain = utils.drain(entity),
-    pollution = utils.pollution(entity),
+    pollution = machine_pollution(entity),
     silo = machine_silo(entity),
     size = utils.size(entity),
     baseEffect = machine_base_effect(entity),
@@ -167,7 +218,6 @@ function entities.machine(entity)
     ingredientUsage = machine_ingredient_usage(entity)
   }
 
-  -- TODO: Qualities?
   local quality_record = {}
   for name, quality in pairs(state.abnormal_qualities) do
     local variant = {}
@@ -187,6 +237,11 @@ function entities.machine(entity)
       variant.usage = usage
     end
 
+    local pollution = machine_pollution(entity, name)
+    if pollution ~= machine.pollution then
+      variant.pollution = pollution
+    end
+
     if next(variant) ~= nil then
       quality_record[name] = variant
     end
@@ -195,6 +250,8 @@ function entities.machine(entity)
   if next(quality_record) ~= nil then
     machine.qualityRecord = quality_record
   end
+
+  process_producers(entity, item)
 
   return machine
 end

@@ -22,12 +22,8 @@ function utils.drain(entity)
   return convert_energy(drain)
 end
 
-function utils.pollution(entity)
-  return entity.emissions_per_second["pollution"] > 0 and entity.emissions_per_second["pollution"] * 60 or nil
-end
-
 function utils.disallowed_effects(entity)
-  if not entity.module_inventory_size or not entity.allowed_effects then
+  if not entity.allowed_effects then
     return nil
   end
 
@@ -38,7 +34,7 @@ function utils.disallowed_effects(entity)
     end
   end
 
-  return #result and result or nil
+  return #result > 0 and result or nil
 end
 
 function utils.size(entity)
@@ -151,6 +147,24 @@ function utils.modules(entity, quality)
   end
 
   return entity.module_inventory_size
+end
+
+function utils.has_ocean(planet, fluid)
+  if
+    planet.type ~= "planet" or not planet.map_gen_settings or
+      not planet.map_gen_settings.autoplace_settings.tile.settings
+   then
+    return false
+  end
+
+  for tile_name, settings in pairs(planet.map_gen_settings.autoplace_settings.tile.settings) do
+    local tile = prototypes.tile[tile_name]
+    if tile.fluid and tile.fluid.name == fluid then
+      return true
+    end
+  end
+
+  return false
 end
 
 return utils

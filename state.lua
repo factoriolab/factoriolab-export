@@ -22,6 +22,20 @@ state.data = {
 }
 state.icons = {}
 state.abnormal_qualities = {}
+state.recipes_locked = {}
+state.producers = {
+  burner = {},
+  crafting = {},
+  resource = {},
+  resource_fluid = {},
+  asteroid = {},
+  agriculture = {}
+}
+state.machines = {
+  offshore_pump = {}
+}
+state.item_map = {}
+state.fluid_map = {}
 
 for name, quality in pairs(prototypes.quality) do
   if quality.level > 0 then
