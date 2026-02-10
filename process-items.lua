@@ -88,7 +88,7 @@ return function()
       category = proto.group.name
     }
     table.insert(state.data.items, item)
-    state.fluid_map[name] = item
+    state.item_map[item.id] = item
     table.insert(state.icons, {sprite = sprite, scale = 2})
     table.insert(localised_strings, proto.localised_name)
   end

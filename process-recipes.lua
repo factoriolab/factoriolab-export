@@ -50,10 +50,10 @@ return function()
     if proto.type == "resource" then
       -- Resource recipes
       if proto.mineable_properties.minable and proto.mineable_properties.products then
-        local out, catalyst = recipes.products(proto.mineable_properties)
-
+        local out, catalyst, total = recipes.products(proto.mineable_properties)
         local firstOut = next(out)
-        local item = state.item_map[next(out)]
+        local item = state.item_map[firstOut]
+
         local producers = state.producers.resource[proto.resource_category]
         local recipeIn = {}
         if proto.mineable_properties.required_fluid and proto.mineable_properties.fluid_amount then
@@ -61,7 +61,14 @@ return function()
           producers = state.producers.resource_fluid[proto.resource_category]
         end
 
-        if item then
+        local locations = {}
+        for surface_name, surface_proto in pairs(prototypes.space_location) do
+          if utils.has_resource(surface_proto, name) then
+            table.insert(locations, surface_name)
+          end
+        end
+
+        if item and #locations > 0 and #producers > 0 and total > 0 then
           local recipe = {
             id = "resource-" .. name,
             icon = item.icon,
@@ -72,9 +79,15 @@ return function()
             out = out,
             catalyst = catalyst,
             producers = producers,
+            cost = 100 / total,
             flags = {"mining"},
+            locations = locations,
             name = item.name
           }
+
+          if proto.infinite_resource then
+            table.insert(recipe.flags, "infinite")
+          end
 
           table.insert(state.data.recipes, recipe)
         end
@@ -93,7 +106,8 @@ return function()
     if #locations > 0 then
       for entity_name, info in pairs(state.machines.offshore_pump) do
         if not info.filter or info.filter == name then
-          local item = state.fluid_map[name]
+          local fluid_id = "fluid-" .. name
+          local item = state.item_map[fluid_id]
           local recipe = {
             id = "pump-" .. entity_name .. "-" .. name,
             icon = item.icon,

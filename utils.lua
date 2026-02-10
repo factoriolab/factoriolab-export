@@ -149,7 +149,7 @@ function utils.modules(entity, quality)
   return entity.module_inventory_size
 end
 
-function utils.has_ocean(planet, fluid)
+function utils.has_ocean(planet, name)
   if
     planet.type ~= "planet" or not planet.map_gen_settings or
       not planet.map_gen_settings.autoplace_settings.tile.settings
@@ -159,9 +159,24 @@ function utils.has_ocean(planet, fluid)
 
   for tile_name, settings in pairs(planet.map_gen_settings.autoplace_settings.tile.settings) do
     local tile = prototypes.tile[tile_name]
-    if tile.fluid and tile.fluid.name == fluid then
+    if tile.fluid and tile.fluid.name == name then
       return true
     end
+  end
+
+  return false
+end
+
+function utils.has_resource(planet, name)
+  if
+    planet.type ~= "planet" or not planet.map_gen_settings or
+      not planet.map_gen_settings.autoplace_settings.entity.settings
+   then
+    return false
+  end
+
+  if planet.map_gen_settings.autoplace_settings.entity.settings[name] then
+    return true
   end
 
   return false

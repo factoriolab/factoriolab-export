@@ -18,6 +18,7 @@ function technologies.technology(technology)
   for _, effect in ipairs(technology.effects) do
     if effect.type == "belt-stack-size-bonus" then
       result.beltStack = (result.beltStack or 0) + effect.modifier
+      state.flags["beltStack"] = true
     elseif effect.type == "bulk-inserter-stack-size-bonus" then
       if not result.inserterStack then
         result.inserterStack = {}
@@ -38,6 +39,7 @@ function technologies.technology(technology)
       table.insert(result.inserterStack, {value = effect.modifier})
     elseif effect.type == "laboratory-productivity" then
       result.researchProductivity = (result.researchProductivity or 0) + effect.modifier
+      state.flags["researchProductivity"] = true
     elseif effect.type == "laboratory-speed" then
       result.researchSpeed = (result.researchSpeed or 0) + effect.modifier
     elseif effect.type == "mining-drill-productivity-bonus" then

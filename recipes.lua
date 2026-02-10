@@ -14,6 +14,7 @@ end
 function recipes.products(recipe)
   local result = {}
   local catalyst
+  local total = 0
 
   for _, product in ipairs(recipe.products) do
     local id = product.type .. "-" .. product.name
@@ -31,6 +32,7 @@ function recipes.products(recipe)
     end
 
     result[id] = result[id] + amount
+    total = total + amount
 
     if product.ignored_by_productivity then
       if not catalyst then
@@ -45,7 +47,7 @@ function recipes.products(recipe)
     end
   end
 
-  return result, catalyst
+  return result, catalyst, total
 end
 
 return recipes

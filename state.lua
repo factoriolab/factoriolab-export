@@ -9,7 +9,6 @@ state.data = {
     "minimumFactor",
     "miningDepletion",
     "miningProductivity",
-    "mods",
     "pollution",
     "power",
     "researchSpeed"
@@ -20,6 +19,7 @@ state.data = {
   recipes = {},
   locations = {}
 }
+state.flags = {}
 state.icons = {}
 state.abnormal_qualities = {}
 state.recipes_locked = {}
@@ -35,7 +35,6 @@ state.machines = {
   offshore_pump = {}
 }
 state.item_map = {}
-state.fluid_map = {}
 
 for name, quality in pairs(prototypes.quality) do
   if quality.level > 0 then
