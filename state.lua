@@ -28,12 +28,12 @@ state.producers = {
   crafting = {},
   resource = {},
   resource_fluid = {},
-  asteroid = {},
-  agriculture = {}
+  asteroid = {}
 }
 state.machines = {
   boiler = {},
-  offshore_pump = {}
+  offshore_pump = {},
+  silo = {}
 }
 state.item_map = {}
 

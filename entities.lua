@@ -1,9 +1,11 @@
 local state = require("state")
 local utils = require("utils")
+local recipes = require("recipes")
+local translations = require("translations")
 
 local entities = {}
 
-function entities.item(localised_strings, entity)
+function entities.item(entity)
   local sprite = "entity/" .. entity.name
   local item = {
     id = "entity-" .. entity.name,
@@ -14,7 +16,7 @@ function entities.item(localised_strings, entity)
   table.insert(state.data.items, item)
   state.item_map[item.id] = item
   table.insert(state.icons, {sprite = sprite, scale = 2})
-  table.insert(localised_strings, entity.localised_name)
+  translations.add(entity.localised_name, item)
   return item
 end
 
@@ -164,8 +166,14 @@ local function machine_pollution(entity, quality)
 end
 
 local function machine_silo(entity)
-  -- TODO
-  return nil
+  if entity.type ~= "rocket-silo" then
+    return nil
+  end
+
+  return {
+    parts = entity.rocket_parts_required,
+    launch = 0
+  }
 end
 
 local function machine_base_effect(entity)
@@ -202,17 +210,39 @@ end
 local function process_producers(entity, item)
   if entity.crafting_categories then
     add_producers(item.id, entity.crafting_categories, "crafting")
-  elseif entity.resource_categories then
+  end
+
+  if entity.resource_categories then
     add_producers(item.id, entity.resource_categories, "resource")
     if #entity.fluidbox_prototypes > 0 then
       add_producers(item.id, entity.resource_categories, "resource_fluid")
     end
   end
 
+  if entity.burner_prototype then
+    add_producers(item.id, entity.burner_prototype.fuel_categories, "burner")
+  end
+
   if entity.type == "offshore-pump" then
     state.machines.offshore_pump[entity.name] = {id = item.id, output = output_fluid(entity)}
   elseif entity.type == "boiler" then
     state.machines.boiler[entity.name] = {id = item.id, output = output_fluid(entity), input = input_fluid(entity)}
+  elseif entity.type == "rocket-silo" then
+    -- TODO: Handle silos without fixed part recipes?
+    if entity.fixed_recipe then
+      local recipe = prototypes.recipe[entity.fixed_recipe]
+      local out, catalyst, total = recipes.products(recipe.products)
+      local part
+      local recipe_in = {}
+      for item_id, amount in pairs(out) do
+        part = item_id
+        recipe_in[item_id] = out[item_id] * entity.rocket_parts_required
+      end
+
+      if part then
+        state.machines.silo[entity.name] = {id = item.id, part = part, recipe_in = recipe_in}
+      end
+    end
   end
 end
 

@@ -3,17 +3,20 @@ local items = require("items")
 local get_row_fn = require("get-row-fn")
 local process_collection = require("process-collection")
 local state = require("state")
-local translate_collection = require("translate-collection")
+local translations = require("translations")
 local process_recipes = require("process-recipes")
 local technologies = require("technologies")
 
 return function()
   log("init process_items")
-  local localised_strings = {}
   local item_row = get_row_fn()
   local item_map = {}
 
   local function process_item(name, proto)
+    if proto.parameter then
+      return
+    end
+
     local sprite = "item/" .. name
     local item = {
       id = "item-" .. name,
@@ -38,18 +41,22 @@ return function()
     state.item_map[item.id] = item
     item_map[name] = item
     table.insert(state.icons, {sprite = sprite, scale = 2})
-    table.insert(localised_strings, proto.localised_name)
+    translations.add(proto.localised_name, item)
   end
 
   local function process_entity(name, proto)
+    if proto.parameter then
+      return
+    end
+
     if proto.type == "beacon" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.beacon = entities.beacon(proto)
     elseif proto.type == "transport-belt" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.belt = entities.belt(proto)
     elseif proto.type == "pump" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.pipe = entities.pipe(proto)
     elseif
       proto.type == "agricultural-tower" or proto.type == "assembling-machine" or proto.type == "asteroid-collector" or
@@ -65,21 +72,25 @@ return function()
         proto.type == "reactor" or
         proto.type == "rocket-silo"
      then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.machine = entities.machine(proto, item)
     elseif proto.type == "cargo-wagon" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.cargoWagon = entities.cargo_wagon(proto)
     elseif proto.type == "fluid-wagon" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.fluidWagon = entities.fluid_wagon(proto)
     elseif proto.type == "inserter" then
-      local item = item_map[name] or entities.item(localised_strings, proto)
+      local item = item_map[name] or entities.item(proto)
       item.inserter = entities.inserter(proto)
     end
   end
 
   local function process_fluid(name, proto)
+    if proto.parameter then
+      return
+    end
+
     local sprite = "fluid/" .. name
     local item = {
       id = "fluid-" .. name,
@@ -90,36 +101,30 @@ return function()
     table.insert(state.data.items, item)
     state.item_map[item.id] = item
     table.insert(state.icons, {sprite = sprite, scale = 2})
-    table.insert(localised_strings, proto.localised_name)
+    translations.add(proto.localised_name, item)
   end
 
   local function process_technology(name, proto)
+    if proto.parameter then
+      return
+    end
+
     local sprite = "technology/" .. name
-    table.insert(
-      state.data.items,
-      {
-        id = "technology-" .. name,
-        icon = sprite,
-        row = item_row(proto),
-        category = "technology",
-        technology = technologies.technology(proto)
-      }
-    )
-
+    local item = {
+      id = "technology-" .. name,
+      icon = sprite,
+      row = item_row(proto),
+      category = "technology",
+      technology = technologies.technology(proto)
+    }
+    table.insert(state.data.items, item)
     table.insert(state.icons, {sprite = sprite, scale = 0.5})
-    table.insert(localised_strings, proto.localised_name)
-  end
-
-  local function finalize_technologies()
-    log("init finalize_technologies")
-    translate_collection(state.player, localised_strings, state.data.items, process_recipes)
-    script.on_event(defines.events.on_tick, nil)
-    log("end finalize_technologies")
+    translations.add(proto.localised_name, item)
   end
 
   local function finalize_fluids()
     log("init finalize_fluids")
-    process_collection(prototypes.technology, process_technology, finalize_technologies)
+    process_collection(prototypes.technology, process_technology, process_recipes)
     log("end finalize_fluids")
   end
 

@@ -1,4 +1,4 @@
-local process_categories = require("process-categories")
+local process_technologies = require("process-technologies")
 local state = require("state")
 
 local function setup()
@@ -17,7 +17,7 @@ local function setup()
     table.insert(state.data.flags, "rockets")
   end
 
-  script.on_event(defines.events.on_tick, process_categories)
+  script.on_event(defines.events.on_tick, process_technologies)
   log("end setup")
 end
 

@@ -1,37 +1,41 @@
 local process_collection = require("process-collection")
 local state = require("state")
-local translate_collection = require("translate-collection")
+local translations = require("translations")
 local process_qualities = require("process-qualities")
 
 return function()
   log("init process_locations")
-  local localised_strings = {}
 
   local function process_space_location(name, proto)
+    if proto.parameter then
+      return
+    end
+
     if proto.type ~= "planet" then
       return
     end
 
     local sprite = "space-location/" .. name
-    table.insert(state.data.locations, {id = name, icon = sprite})
+    local location = {id = name, icon = sprite}
+    table.insert(state.data.locations, location)
     table.insert(state.icons, {sprite = sprite, scale = 2})
-    table.insert(localised_strings, proto.localised_name)
+    translations.add(proto.localised_name, location)
   end
 
   local function process_surface(name, proto)
-    local sprite = "surface/" .. name
-    table.insert(state.data.locations, {id = name, icon = sprite})
-    table.insert(state.icons, {sprite = sprite, scale = 2})
-    table.insert(localised_strings, proto.localised_name)
-  end
+    if proto.parameter then
+      return
+    end
 
-  local function finalize_surfaces()
-    translate_collection(state.player, localised_strings, state.data.locations, process_qualities)
-    script.on_event(defines.events.on_tick, nil)
+    local sprite = "surface/" .. name
+    local location = {id = name, icon = sprite}
+    table.insert(state.data.locations, location)
+    table.insert(state.icons, {sprite = sprite, scale = 2})
+    translations.add(proto.localised_name, location)
   end
 
   local function finalize_space_locations()
-    process_collection(prototypes.surface, process_surface, finalize_surfaces)
+    process_collection(prototypes.surface, process_surface, process_qualities)
   end
 
   process_collection(prototypes.space_location, process_space_location, finalize_space_locations)

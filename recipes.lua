@@ -11,12 +11,12 @@ function recipes.ingredients(recipe)
   return result
 end
 
-function recipes.products(recipe)
+function recipes.products(products)
   local result = {}
   local catalyst
   local total = 0
 
-  for _, product in ipairs(recipe.products) do
+  for _, product in ipairs(products) do
     local id = product.type .. "-" .. product.name
     local amount = product.amount
     if not amount then

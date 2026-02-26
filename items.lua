@@ -6,7 +6,7 @@ function items.fuel(item)
   return {
     category = item.fuel_category,
     value = item.fuel_value / 1000000,
-    result = item.burnt_result and item.burnt_result.name or nil
+    result = item.burnt_result and "item-" .. item.burnt_result.name or nil
   }
 end
 

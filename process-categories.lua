@@ -1,27 +1,26 @@
 local process_collection = require("process-collection")
 local state = require("state")
-local translate_collection = require("translate-collection")
+local translations = require("translations")
 local process_items = require("process-items")
 
 return function()
   log("init process_categories")
-  local localised_strings = {}
-
   local function process_category(name, proto)
     local sprite = "item-group/" .. name
-    table.insert(state.data.categories, {id = name, icon = sprite})
+    local category = {id = name, icon = sprite}
+    table.insert(state.data.categories, category)
     table.insert(state.icons, {sprite = sprite, scale = 1})
-    table.insert(localised_strings, proto.localised_name)
+    translations.add(proto.localised_name, category)
   end
 
   local function finalize_categories()
     log("init finalize_categories")
 
-    table.insert(state.data.categories, {id = "technology", icon = "item/lab"})
-    table.insert(localised_strings, {"gui-map-generator.technology-difficulty-group-tile"})
+    local category = {id = "technology", icon = "item/lab"}
+    table.insert(state.data.categories, category)
+    translations.add({"gui-map-generator.technology-difficulty-group-tile"}, category)
 
-    translate_collection(state.player, localised_strings, state.data.categories, process_items)
-    script.on_event(defines.events.on_tick, nil)
+    script.on_event(defines.events.on_tick, process_items)
     log("end finalize_categories")
   end
 
