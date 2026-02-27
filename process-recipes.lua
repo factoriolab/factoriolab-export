@@ -41,11 +41,11 @@ return function()
           out = out,
           catalyst = catalyst,
           part = info.part,
-          producers = {info.id},
-          name = item.name
+          producers = {info.id}
         }
 
         table.insert(state.data.recipes, recipe)
+        translations.add({"factoriolab-export.launch-item", proto.localised_name}, recipe)
       end
     end
 
@@ -64,11 +64,14 @@ return function()
           ["in"] = {["item-" .. name] = 0},
           out = {[item.id] = 0},
           producers = producers,
-          flags = {"burn"},
-          name = item.name
+          flags = {"burn"}
         }
 
         table.insert(state.data.recipes, recipe)
+        translations.add(
+          {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name},
+          recipe
+        )
       end
     end
 
@@ -82,11 +85,11 @@ return function()
         category = proto.group.name,
         time = 1,
         ["in"] = {["item-" .. name] = 1},
-        out = {[item.id] = 0},
-        name = item.name
+        out = {[item.id] = 1}
       }
 
       table.insert(state.data.recipes, recipe)
+      translations.add({"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name}, recipe)
     end
 
     if
@@ -109,11 +112,11 @@ return function()
         out = out,
         catalyst = catalyst,
         cost = 100 / total,
-        locations = utils.locations(proto.plant_result),
-        name = item.name
+        locations = utils.locations(proto.plant_result)
       }
 
       table.insert(state.data.recipes, recipe)
+      translations.add({"factoriolab-export.harvest-item", proto.plant_result.localised_name}, recipe)
     end
   end
 
@@ -156,8 +159,7 @@ return function()
             producers = producers,
             cost = 100 / total,
             flags = {"mining"},
-            locations = locations,
-            name = item.name
+            locations = locations
           }
 
           if proto.infinite_resource then
@@ -165,6 +167,7 @@ return function()
           end
 
           table.insert(state.data.recipes, recipe)
+          translations.add({"factoriolab-export.mining-item", proto.localised_name}, recipe)
         end
       end
     end
@@ -203,11 +206,11 @@ return function()
           ["in"] = {},
           out = {[item.id] = 1},
           producers = producers,
-          locations = locations,
-          name = item.name
+          locations = locations
         }
 
         table.insert(state.data.recipes, recipe)
+        translations.add({"factoriolab-export.offshore-pump-item", proto.localised_name}, recipe)
       end
     end
 
@@ -233,11 +236,11 @@ return function()
         time = 1,
         ["in"] = {[input_id] = 1},
         out = {[item.id] = 10},
-        producers = producers,
-        name = item.name
+        producers = producers
       }
 
       table.insert(state.data.recipes, recipe)
+      translations.add({"factoriolab-export.boil-item", prototypes.fluid[input].localised_name}, recipe)
     end
   end
 

@@ -113,7 +113,7 @@ return function()
     local item = {
       id = "technology-" .. name,
       icon = sprite,
-      row = item_row(proto),
+      row = #proto.research_unit_ingredients,
       category = "technology",
       technology = technologies.technology(proto)
     }
