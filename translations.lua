@@ -11,7 +11,6 @@ end
 
 function translations.request(player, nextFn)
   local ids = player.request_translations(localised_strings)
-  log(#localised_strings .. " : " .. #items)
   for i = 1, #ids do
     requests[ids[i]] = i
   end

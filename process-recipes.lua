@@ -287,18 +287,24 @@ return function()
   -- Technology recipes (or new technology collection?)
   -- Asteroid recipes (space connection AND space location, ideally?)
 
-  local function finalize_entities()
-    process_collection(prototypes.fluid, process_fluid, process_locations)
-  end
-
-  local function finalize_items()
-    process_collection(prototypes.entity, process_entity, finalize_entities)
-  end
-
-  local function finalize_recipes()
-    process_collection(prototypes.item, process_item, finalize_items)
-  end
-
-  process_collection(prototypes.recipe, process_recipe, finalize_recipes)
+  process_collection(
+    prototypes.recipe,
+    process_recipe,
+    function()
+      process_collection(
+        prototypes.item,
+        process_item,
+        function()
+          process_collection(
+            prototypes.entity,
+            process_entity,
+            function()
+              process_collection(prototypes.fluid, process_fluid, process_locations)
+            end
+          )
+        end
+      )
+    end
+  )
   log("end process_recipes")
 end

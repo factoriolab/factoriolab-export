@@ -34,11 +34,13 @@ return function()
     translations.add(proto.localised_name, location)
   end
 
-  local function finalize_space_locations()
-    process_collection(prototypes.surface, process_surface, process_qualities)
-  end
-
-  process_collection(prototypes.space_location, process_space_location, finalize_space_locations)
+  process_collection(
+    prototypes.space_location,
+    process_space_location,
+    function()
+      process_collection(prototypes.surface, process_surface, process_qualities)
+    end
+  )
 
   log("end process_locations")
 end

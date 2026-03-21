@@ -5,7 +5,6 @@ local process_collection = require("process-collection")
 local state = require("state")
 local translations = require("translations")
 local process_recipes = require("process-recipes")
-local technologies = require("technologies")
 
 return function()
   log("init process_items")
@@ -104,42 +103,18 @@ return function()
     translations.add(proto.localised_name, item)
   end
 
-  local function process_technology(name, proto)
-    if proto.parameter then
-      return
+  process_collection(
+    prototypes.item,
+    process_item,
+    function()
+      process_collection(
+        prototypes.entity,
+        process_entity,
+        function()
+          process_collection(prototypes.fluid, process_fluid, process_recipes)
+        end
+      )
     end
-
-    local sprite = "technology/" .. name
-    local item = {
-      id = "technology-" .. name,
-      icon = sprite,
-      row = #proto.research_unit_ingredients,
-      category = "technology",
-      technology = technologies.technology(proto)
-    }
-    table.insert(state.data.items, item)
-    table.insert(state.icons, {sprite = sprite, scale = 0.5})
-    translations.add(proto.localised_name, item)
-  end
-
-  local function finalize_fluids()
-    log("init finalize_fluids")
-    process_collection(prototypes.technology, process_technology, process_recipes)
-    log("end finalize_fluids")
-  end
-
-  local function finalize_entities()
-    log("init finalize_entities")
-    process_collection(prototypes.fluid, process_fluid, finalize_fluids)
-    log("end finalize_entities")
-  end
-
-  local function finalize_items()
-    log("init finalize_items")
-    process_collection(prototypes.entity, process_entity, finalize_entities)
-    log("end finalize_items")
-  end
-
-  process_collection(prototypes.item, process_item, finalize_items)
+  )
   log("end process_items")
 end
