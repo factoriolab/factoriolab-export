@@ -7,8 +7,8 @@ return function()
 
   -- Calculate sprite sheet width (height determined by # of loop iterations)
   local width = math.max(math.ceil((#state.icons) ^ 0.5), 8)
-  local x_position = width - 1
-  local x_resolution = width * 64
+  local x_position = width - 1 + (width / 64)
+  local x_resolution = (width * 64) + width
 
   local x = 0
   local y = 0
@@ -18,7 +18,7 @@ return function()
         sprite = icon.sprite,
         x_scale = icon.scale,
         y_scale = icon.scale,
-        target = {x = x * 2, y = y * 2},
+        target = {x = (x * 2) + (x / 32), y = (y * 2) + (y / 32)},
         surface = sprite_surface
       }
     )
@@ -27,8 +27,8 @@ return function()
       state.data.icons,
       {
         id = icon.sprite,
-        x = x * 64,
-        y = y * 64
+        x = (x * 64) + x,
+        y = (y * 64) + y
       }
     )
 
@@ -44,8 +44,8 @@ return function()
   end
 
   local rows = y + 1
-  local y_resolution = rows * 64
-  local y_position = rows - 1
+  local y_resolution = (rows * 64) + rows
+  local y_position = rows - 1 + (rows / 64)
 
   game.take_screenshot(
     {
