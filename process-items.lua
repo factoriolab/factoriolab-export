@@ -1,13 +1,14 @@
 local entities = require("entities")
-local items = require("items")
 local get_row_fn = require("get-row-fn")
+local items = require("items")
 local process_collection = require("process-collection")
-local state = require("state")
-local translations = require("translations")
 local process_recipes = require("process-recipes")
+local state = require("state")
 
 return function()
   log("init process_items")
+  state.print("init process_items")
+
   local item_row = get_row_fn()
   local item_map = {}
 
@@ -36,11 +37,9 @@ return function()
       item.module = items.module(proto)
     end
 
-    table.insert(state.data.items, item)
+    table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
     state.item_map[item.id] = item
     item_map[name] = item
-    table.insert(state.icons, {sprite = sprite, scale = 2})
-    translations.add(proto.localised_name, item)
   end
 
   local function process_entity(name, proto)
@@ -97,10 +96,9 @@ return function()
       row = item_row(proto),
       category = proto.group.name
     }
-    table.insert(state.data.items, item)
+
+    table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
     state.item_map[item.id] = item
-    table.insert(state.icons, {sprite = sprite, scale = 2})
-    translations.add(proto.localised_name, item)
   end
 
   process_collection(

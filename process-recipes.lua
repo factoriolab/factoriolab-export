@@ -1,16 +1,17 @@
 local get_row_fn = require("get-row-fn")
 local process_collection = require("process-collection")
-local state = require("state")
-local translations = require("translations")
-local process_locations = require("process-locations")
+local process_categories = require("process-categories")
 local recipes = require("recipes")
+local state = require("state")
 local utils = require("utils")
 
 return function()
   log("init process_recipes")
+  state.print("init process_recipes")
+
   local recipe_row = get_row_fn()
 
-  local function process_item(name, proto)
+  local function process_item_recipes(name, proto)
     if proto.parameter then
       return
     end
@@ -44,8 +45,14 @@ return function()
           producers = {info.id}
         }
 
-        table.insert(state.data.recipes, recipe)
-        translations.add({"factoriolab-export.launch-item", proto.localised_name}, recipe)
+        recipes.store_used_items(recipe)
+        table.insert(
+          state.recipes_meta,
+          {
+            recipe = recipe,
+            localised_name = {"factoriolab-export.launch-item", proto.localised_name}
+          }
+        )
       end
     end
 
@@ -67,10 +74,13 @@ return function()
           flags = {"burn"}
         }
 
-        table.insert(state.data.recipes, recipe)
-        translations.add(
-          {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name},
-          recipe
+        recipes.store_used_items(recipe)
+        table.insert(
+          state.recipes_meta,
+          {
+            recipe = recipe,
+            localised_name = {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name}
+          }
         )
       end
     end
@@ -88,8 +98,14 @@ return function()
         out = {[item.id] = 1}
       }
 
-      table.insert(state.data.recipes, recipe)
-      translations.add({"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name}, recipe)
+      recipes.store_used_items(recipe)
+      table.insert(
+        state.recipes_meta,
+        {
+          recipe = recipe,
+          localised_name = {"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name}
+        }
+      )
     end
 
     if
@@ -115,12 +131,15 @@ return function()
         locations = utils.locations(proto.plant_result)
       }
 
-      table.insert(state.data.recipes, recipe)
-      translations.add({"factoriolab-export.harvest-item", proto.plant_result.localised_name}, recipe)
+      recipes.store_used_items(recipe)
+      table.insert(
+        state.recipes_meta,
+        {recipe = recipe, localised_name = {"factoriolab-export.harvest-item", proto.plant_result.localised_name}}
+      )
     end
   end
 
-  local function process_entity(name, proto)
+  local function process_entity_recipes(name, proto)
     if proto.parameter then
       return
     end
@@ -128,6 +147,15 @@ return function()
     if proto.type == "resource" then
       -- Resource recipes
       if proto.mineable_properties.minable and proto.mineable_properties.products then
+        local first_product = proto.mineable_properties.products[1]
+        local first_product_proto
+
+        if first_product.type == "item" then
+          first_product_proto = prototypes.item[first_product.name]
+        elseif first_product.type == "fluid" then
+          first_product_proto = prototypes.fluid[first_product.name]
+        end
+
         local out, catalyst, total = recipes.products(proto.mineable_properties.products)
         local first_out = next(out)
         local item = state.item_map[first_out]
@@ -150,8 +178,8 @@ return function()
           local recipe = {
             id = "resource-" .. name,
             icon = item.icon,
-            row = recipe_row(proto),
-            category = proto.group.name,
+            row = recipe_row(first_product_proto),
+            category = first_product_proto.group.name,
             time = proto.mineable_properties.mining_time,
             ["in"] = recipe_in,
             out = out,
@@ -166,14 +194,17 @@ return function()
             table.insert(recipe.flags, "infinite")
           end
 
-          table.insert(state.data.recipes, recipe)
-          translations.add({"factoriolab-export.mining-item", proto.localised_name}, recipe)
+          recipes.store_used_items(recipe)
+          table.insert(
+            state.recipes_meta,
+            {recipe = recipe, localised_name = {"factoriolab-export.mining-item", proto.localised_name}}
+          )
         end
       end
     end
   end
 
-  local function process_fluid(name, proto)
+  local function process_fluid_recipes(name, proto)
     if proto.parameter then
       return
     end
@@ -209,8 +240,11 @@ return function()
           locations = locations
         }
 
-        table.insert(state.data.recipes, recipe)
-        translations.add({"factoriolab-export.offshore-pump-item", proto.localised_name}, recipe)
+        recipes.store_used_items(recipe)
+        table.insert(
+          state.recipes_meta,
+          {recipe = recipe, localised_name = {"factoriolab-export.offshore-pump-item", proto.localised_name}}
+        )
       end
     end
 
@@ -239,13 +273,16 @@ return function()
         producers = producers
       }
 
-      table.insert(state.data.recipes, recipe)
-      translations.add({"factoriolab-export.boil-item", prototypes.fluid[input].localised_name}, recipe)
+      recipes.store_used_items(recipe)
+      table.insert(
+        state.recipes_meta,
+        {recipe = recipe, localised_name = {"factoriolab-export.boil-item", prototypes.fluid[input].localised_name}}
+      )
     end
   end
 
   local function process_recipe(name, proto)
-    if proto.parameter then
+    if proto.parameter or not recipes.included(proto) then
       return
     end
 
@@ -268,6 +305,8 @@ return function()
 
     if proto.category == "recycling" then
       table.insert(recipe.flags, "recycling")
+    else
+      recipes.store_used_items(recipe)
     end
 
     if state.recipes_locked[name] then
@@ -278,14 +317,11 @@ return function()
       recipe.flags = nil
     end
 
-    table.insert(state.data.recipes, recipe)
-    table.insert(state.icons, {sprite = sprite, scale = 2})
-    translations.add(proto.localised_name, recipe)
+    table.insert(state.recipes_meta, {recipe = recipe, sprite = sprite, scale = 2, proto = proto})
   end
 
   -- TODO: Not-recipe recipes
-  -- Technology recipes (or new technology collection?)
-  -- Asteroid recipes (space connection AND space location, ideally?)
+  -- Asteroid recipes (space connection AND space location, ideally?) (process these during location parsing?)
 
   process_collection(
     prototypes.recipe,
@@ -293,13 +329,13 @@ return function()
     function()
       process_collection(
         prototypes.item,
-        process_item,
+        process_item_recipes,
         function()
           process_collection(
             prototypes.entity,
-            process_entity,
+            process_entity_recipes,
             function()
-              process_collection(prototypes.fluid, process_fluid, process_locations)
+              process_collection(prototypes.fluid, process_fluid_recipes, process_categories)
             end
           )
         end

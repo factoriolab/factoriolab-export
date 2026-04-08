@@ -1,17 +1,17 @@
 local process_collection = require("process-collection")
+local filter_items = require("filter-items")
 local state = require("state")
 local translations = require("translations")
-local process_translations = require("process-translations")
-local write_icons = require("write-icons")
 
 return function()
   log("init process_qualities")
+  state.print("init process_qualities")
 
   if #prototypes.quality > 1 then
     state.data.qualities = {}
 
     local function process_quality(name, proto)
-      if proto.parameter then
+      if proto.parameter or proto.hidden then
         return
       end
 
@@ -22,9 +22,9 @@ return function()
       translations.add(proto.localised_name, quality)
     end
 
-    process_collection(prototypes.quality, process_quality, process_translations)
+    process_collection(prototypes.quality, process_quality, filter_items)
   else
-    script.on_event(defines.events.on_tick, write_icons)
+    script.on_event(defines.events.on_tick, filter_items)
   end
 
   log("end process_qualities")

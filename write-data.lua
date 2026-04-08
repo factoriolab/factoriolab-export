@@ -2,6 +2,7 @@ local state = require("state")
 
 return function()
   log("init write_data")
+  state.print("init write_data")
 
   -- Add extra flags
   for flag, value in pairs(state.flags) do
@@ -13,5 +14,19 @@ return function()
   helpers.write_file("data.json", helpers.table_to_json(state.data))
   script.on_event(defines.events.on_tick, nil)
   log("end write_data")
-  state.player.print("done") --TODO: Localised message or full progress bar
+
+  local i = 0
+  for a, b in pairs(state.items_used) do
+    i = i + 1
+  end
+
+  for _, item in pairs(state.data.items) do
+    if not state.items_used[item.id] then
+      log(item.id)
+    end
+  end
+
+  state.print("items used: " .. i)
+  state.print("items created: " .. #state.data.items)
+  state.print("done") --TODO: Localised message or full progress bar
 end

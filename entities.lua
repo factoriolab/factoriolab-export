@@ -1,7 +1,6 @@
+local recipes = require("recipes")
 local state = require("state")
 local utils = require("utils")
-local recipes = require("recipes")
-local translations = require("translations")
 
 local entities = {}
 
@@ -13,10 +12,9 @@ function entities.item(entity)
     row = 0,
     category = "entity"
   }
-  table.insert(state.data.items, item)
+  table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
   state.item_map[item.id] = item
-  table.insert(state.icons, {sprite = sprite, scale = 2})
-  translations.add(entity.localised_name, item)
+  state.items_used[item.id] = true
   return item
 end
 
@@ -301,6 +299,9 @@ function entities.machine(entity, item)
   end
 
   process_producers(entity, item)
+  if entity.fixed_recipe then
+    state.recipes_fixed[entity.fixed_recipe] = true
+  end
 
   return machine
 end

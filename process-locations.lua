@@ -1,10 +1,11 @@
 local process_collection = require("process-collection")
+local process_qualities = require("process-qualities")
 local state = require("state")
 local translations = require("translations")
-local process_qualities = require("process-qualities")
 
 return function()
   log("init process_locations")
+  state.print("init process_locations")
 
   local function process_space_location(name, proto)
     if proto.parameter then

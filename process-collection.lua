@@ -1,5 +1,5 @@
 return function(collection, current_fn, next_fn, protos_per_tick)
-  protos_per_tick = protos_per_tick or 50
+  protos_per_tick = protos_per_tick or 200
   local next, key = pairs(collection)
 
   script.on_event(

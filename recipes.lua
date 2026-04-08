@@ -1,3 +1,5 @@
+local state = require("state")
+
 local recipes = {}
 
 function recipes.ingredients(recipe)
@@ -9,6 +11,21 @@ function recipes.ingredients(recipe)
   end
 
   return result
+end
+
+function recipes.included(recipe)
+  if
+    not state.recipes_fixed[recipe.name] and recipe.enabled == false and
+      (not state.recipes_locked[recipe.name] or recipe.hidden)
+   then
+    return false
+  end
+
+  if #recipe.ingredients == 0 and #recipe.products == 0 then
+    return false
+  end
+
+  return true
 end
 
 function recipes.products(products)
@@ -25,6 +42,10 @@ function recipes.products(products)
 
     if product.probability then
       amount = amount * product.probability
+    end
+
+    if product.extra_count_fraction then
+      amount = product.extra_count_fraction
     end
 
     if not result[id] then
@@ -48,6 +69,33 @@ function recipes.products(products)
   end
 
   return result, catalyst, total
+end
+
+function recipes.save(recipe, localised_name, sprite, scale)
+  if not proto or proto.category ~= "recycling" then
+    for id, _ in pairs(recipe["in"]) do
+      state.items_used[id] = true
+    end
+
+    for id, _ in pairs(recipe["out"]) do
+      state.items_used[id] = true
+    end
+  end
+
+  table.insert(
+    state.recipes_meta,
+    {recipe = recipe, localised_name = localised_name, sprite = sprite, scale = scale, proto = proto}
+  )
+end
+
+function recipes.store_used_items(recipe)
+  for id, _ in pairs(recipe["in"]) do
+    state.items_used[id] = true
+  end
+
+  for id, _ in pairs(recipe["out"]) do
+    state.items_used[id] = true
+  end
 end
 
 return recipes

@@ -3,6 +3,8 @@ local write_data = require("write-data")
 
 return function()
   log("init write_icons")
+  state.print("init write_icons")
+
   local sprite_surface = game.create_surface("lab-sprite")
 
   -- Calculate sprite sheet width (height determined by # of loop iterations)
