@@ -8,7 +8,7 @@ return function()
   state.print("init finalize_items")
 
   local item_row = get_row_fn()
-  for _, meta in pairs(state.items_meta) do
+  for _, meta in ipairs(state.items_meta) do
     local item = meta.item
     if not item.row then
       item.row = item_row(meta.proto)

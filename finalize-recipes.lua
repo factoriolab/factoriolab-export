@@ -8,7 +8,7 @@ return function()
   state.print("init finalize_recipes")
 
   local recipe_row = get_row_fn()
-  for _, meta in pairs(state.recipes_meta) do
+  for _, meta in ipairs(state.recipes_meta) do
     local recipe = meta.recipe
     if not recipe.row then
       recipe.row = recipe_row(meta.proto)

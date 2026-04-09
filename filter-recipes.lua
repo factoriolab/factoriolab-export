@@ -6,7 +6,7 @@ return function()
   state.print("init filter_recipes")
 
   local result = {}
-  for _, meta in pairs(state.recipes_meta) do
+  for _, meta in ipairs(state.recipes_meta) do
     local keep = true
     for id, _ in pairs(meta.recipe["in"]) do
       if state.items_removed[id] then

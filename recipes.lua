@@ -98,4 +98,26 @@ function recipes.store_used_items(recipe)
   end
 end
 
+function recipes.add_value(entity, key, value)
+  if not entity[key] then
+    entity[key] = value
+  else
+    entity[key] = entity[key] + value
+  end
+end
+
+function recipes.as_percentage(entity)
+  local total = 0
+  for _, value in pairs(entity) do
+    total = total + value
+  end
+
+  local result = {}
+  for key, value in pairs(entity) do
+    result[key] = value / total
+  end
+
+  return result
+end
+
 return recipes

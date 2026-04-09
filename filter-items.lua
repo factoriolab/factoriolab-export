@@ -6,7 +6,7 @@ return function()
   state.print("init filter_items")
 
   local result = {}
-  for _, meta in pairs(state.items_meta) do
+  for _, meta in ipairs(state.items_meta) do
     if state.items_used[meta.item.id] then
       table.insert(result, meta)
     else

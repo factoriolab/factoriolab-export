@@ -314,9 +314,6 @@ return function()
     table.insert(state.recipes_meta, {recipe = recipe, sprite = sprite, scale = 2, proto = proto})
   end
 
-  -- TODO: Not-recipe recipes
-  -- Asteroid recipes (space connection AND space location, ideally?) (process these during location parsing?)
-
   iterate_collection(
     prototypes.recipe,
     process_recipe,

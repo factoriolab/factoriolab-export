@@ -13,8 +13,6 @@ return function()
       return
     end
 
-    -- TODO: Improve technology ordering, technology recipes
-
     local sprite = "technology/" .. name
     local id = "technology-" .. name
     local item = {
@@ -29,7 +27,7 @@ return function()
 
     if #proto.research_unit_ingredients > 0 then
       local ingredients = {}
-      for _, ingredient in pairs(proto.research_unit_ingredients) do
+      for _, ingredient in ipairs(proto.research_unit_ingredients) do
         local id = "item-" .. ingredient.name
         if not ingredients[id] then
           ingredients[id] = 0

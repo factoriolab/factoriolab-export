@@ -14,7 +14,7 @@ return function()
 
   local x = 0
   local y = 0
-  for _, icon in pairs(state.icons) do
+  for _, icon in ipairs(state.icons) do
     rendering.draw_sprite(
       {
         sprite = icon.sprite,

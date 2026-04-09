@@ -83,7 +83,7 @@ function utils.size(entity)
 end
 
 function eval_surface_conditions(location, conditions)
-  for _, condition in pairs(conditions) do
+  for _, condition in ipairs(conditions) do
     local value =
       location.surface_properties and location.surface_properties[condition.property] or
       prototypes.surface_property[condition.property].default_value
