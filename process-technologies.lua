@@ -16,8 +16,9 @@ return function()
     -- TODO: Improve technology ordering, technology recipes
 
     local sprite = "technology/" .. name
+    local id = "technology-" .. name
     local item = {
-      id = "technology-" .. name,
+      id = id,
       icon = sprite,
       row = #proto.research_unit_ingredients,
       category = "technology",
@@ -25,6 +26,31 @@ return function()
     }
     state.items_used[item.id] = true
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 0.5, proto = proto})
+
+    if #proto.research_unit_ingredients > 0 then
+      local ingredients = {}
+      for _, ingredient in pairs(proto.research_unit_ingredients) do
+        local id = "item-" .. ingredient.name
+        if not ingredients[id] then
+          ingredients[id] = 0
+        end
+
+        ingredients[id] = ingredients[id] + ingredient.amount
+      end
+
+      local recipe = {
+        id = id,
+        icon = sprite,
+        row = #proto.research_unit_ingredients,
+        category = "technology",
+        time = proto.research_unit_energy / 60,
+        producers = state.machines.lab,
+        ["in"] = ingredients,
+        out = {[id] = 1},
+        flags = {"technology"}
+      }
+      table.insert(state.recipes_meta, {recipe = recipe, proto = proto})
+    end
   end
 
   iterate_collection(

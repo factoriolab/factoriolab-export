@@ -1,5 +1,4 @@
 local entities = require("entities")
-local get_row_fn = require("get-row-fn")
 local items = require("items")
 local iterate_collection = require("iterate-collection")
 local process_recipes = require("process-recipes")
@@ -9,7 +8,6 @@ return function()
   log("init process_items")
   state.print("init process_items")
 
-  local item_row = get_row_fn()
   local item_map = {}
 
   local function process_item(name, proto)
@@ -21,8 +19,6 @@ return function()
     local item = {
       id = "item-" .. name,
       icon = sprite,
-      row = item_row(proto),
-      category = proto.group.name,
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and
         math.floor(prototypes.utility_constants.rocket_lift_weight / proto.weight) or
@@ -92,9 +88,7 @@ return function()
     local sprite = "fluid/" .. name
     local item = {
       id = "fluid-" .. name,
-      icon = sprite,
-      row = item_row(proto),
-      category = proto.group.name
+      icon = sprite
     }
 
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})

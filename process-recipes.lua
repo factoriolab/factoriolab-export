@@ -1,4 +1,3 @@
-local get_row_fn = require("get-row-fn")
 local iterate_collection = require("iterate-collection")
 local process_categories = require("process-categories")
 local recipes = require("recipes")
@@ -9,8 +8,6 @@ return function()
   log("init process_recipes")
   state.print("init process_recipes")
 
-  local recipe_row = get_row_fn()
-
   local function process_item_recipes(name, proto)
     if proto.parameter then
       return
@@ -18,6 +15,7 @@ return function()
 
     if #proto.rocket_launch_products > 0 then
       -- Rocket launch recipes
+      local product_proto = utils.first_product_proto(proto.rocket_launch_products)
       local out, catalyst, total = recipes.products(proto.rocket_launch_products)
       local first_out = next(out)
       local item = state.item_map[first_out]
@@ -35,8 +33,6 @@ return function()
         local recipe = {
           id = "launch-" .. info.id .. "-" .. name,
           icon = item.icon,
-          row = recipe_row(proto),
-          category = proto.group.name,
           time = 40.6,
           ["in"] = recipe_in,
           out = out,
@@ -50,7 +46,8 @@ return function()
           state.recipes_meta,
           {
             recipe = recipe,
-            localised_name = {"factoriolab-export.launch-item", proto.localised_name}
+            localised_name = {"factoriolab-export.launch-item", proto.localised_name},
+            proto = product_proto
           }
         )
       end
@@ -65,8 +62,6 @@ return function()
         local recipe = {
           id = "burn-" .. name,
           icon = item.icon,
-          row = recipe_row(proto),
-          category = proto.group.name,
           time = 1,
           ["in"] = {["item-" .. name] = 0},
           out = {[item.id] = 0},
@@ -79,7 +74,8 @@ return function()
           state.recipes_meta,
           {
             recipe = recipe,
-            localised_name = {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name}
+            localised_name = {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name},
+            proto = proto.burnt_result
           }
         )
       end
@@ -91,8 +87,6 @@ return function()
       local recipe = {
         id = "spoil-" .. name,
         icon = item.icon,
-        row = recipe_row(proto),
-        category = proto.group.name,
         time = 1,
         ["in"] = {["item-" .. name] = 1},
         out = {[item.id] = 1}
@@ -103,7 +97,8 @@ return function()
         state.recipes_meta,
         {
           recipe = recipe,
-          localised_name = {"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name}
+          localised_name = {"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name},
+          proto = proto.spoil_result
         }
       )
     end
@@ -113,6 +108,7 @@ return function()
         proto.plant_result.mineable_properties.products
      then
       -- Agriculture recipes
+      local product_proto = utils.first_product_proto(proto.plant_result.mineable_properties.products)
       local out, catalyst, total = recipes.products(proto.plant_result.mineable_properties.products)
       local first_out = next(out)
       local item = state.item_map[first_out]
@@ -121,8 +117,6 @@ return function()
       local recipe = {
         id = "harvest-" .. proto.plant_result.name,
         icon = sprite,
-        row = recipe_row(proto),
-        category = proto.group.name,
         time = proto.plant_result.growth_ticks / 60,
         ["in"] = {["item-" .. name] = 1},
         out = out,
@@ -134,7 +128,11 @@ return function()
       recipes.store_used_items(recipe)
       table.insert(
         state.recipes_meta,
-        {recipe = recipe, localised_name = {"factoriolab-export.harvest-item", proto.plant_result.localised_name}}
+        {
+          recipe = recipe,
+          localised_name = {"factoriolab-export.harvest-item", proto.plant_result.localised_name},
+          proto = product_proto
+        }
       )
     end
   end
@@ -147,15 +145,7 @@ return function()
     if proto.type == "resource" then
       -- Resource recipes
       if proto.mineable_properties.minable and proto.mineable_properties.products then
-        local first_product = proto.mineable_properties.products[1]
-        local first_product_proto
-
-        if first_product.type == "item" then
-          first_product_proto = prototypes.item[first_product.name]
-        elseif first_product.type == "fluid" then
-          first_product_proto = prototypes.fluid[first_product.name]
-        end
-
+        local product_proto = utils.first_product_proto(proto.mineable_properties.products)
         local out, catalyst, total = recipes.products(proto.mineable_properties.products)
         local first_out = next(out)
         local item = state.item_map[first_out]
@@ -178,8 +168,6 @@ return function()
           local recipe = {
             id = "resource-" .. name,
             icon = item.icon,
-            row = recipe_row(first_product_proto),
-            category = first_product_proto.group.name,
             time = proto.mineable_properties.mining_time,
             ["in"] = recipe_in,
             out = out,
@@ -197,7 +185,11 @@ return function()
           recipes.store_used_items(recipe)
           table.insert(
             state.recipes_meta,
-            {recipe = recipe, localised_name = {"factoriolab-export.mining-item", proto.localised_name}}
+            {
+              recipe = recipe,
+              localised_name = {"factoriolab-export.mining-item", proto.localised_name},
+              proto = product_proto
+            }
           )
         end
       end
@@ -231,8 +223,6 @@ return function()
         local recipe = {
           id = "offshore-pump-" .. name,
           icon = item.icon,
-          row = recipe_row(proto),
-          category = proto.group.name,
           time = 1,
           ["in"] = {},
           out = {[item.id] = 1},
@@ -243,7 +233,11 @@ return function()
         recipes.store_used_items(recipe)
         table.insert(
           state.recipes_meta,
-          {recipe = recipe, localised_name = {"factoriolab-export.offshore-pump-item", proto.localised_name}}
+          {
+            recipe = recipe,
+            localised_name = {"factoriolab-export.offshore-pump-item", proto.localised_name},
+            proto = proto
+          }
         )
       end
     end
@@ -265,8 +259,6 @@ return function()
       local recipe = {
         id = "boiler-" .. name,
         icon = item.icon,
-        row = recipe_row(proto),
-        category = proto.group.name,
         time = 1,
         ["in"] = {[input_id] = 1},
         out = {[item.id] = 10},
@@ -276,7 +268,11 @@ return function()
       recipes.store_used_items(recipe)
       table.insert(
         state.recipes_meta,
-        {recipe = recipe, localised_name = {"factoriolab-export.boil-item", prototypes.fluid[input].localised_name}}
+        {
+          recipe = recipe,
+          localised_name = {"factoriolab-export.boil-item", prototypes.fluid[input].localised_name},
+          proto = proto
+        }
       )
     end
   end
@@ -291,8 +287,6 @@ return function()
     local recipe = {
       id = name,
       icon = sprite,
-      row = recipe_row(proto),
-      category = proto.group.name,
       time = proto.energy,
       ["in"] = recipes.ingredients(proto),
       out = out,

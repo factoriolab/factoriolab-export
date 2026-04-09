@@ -187,4 +187,39 @@ function utils.has_resource(planet, name)
   return false
 end
 
+function utils.compare_protos(a, b)
+  local ap = a.proto
+  local bp = b.proto
+  if bp == nil then
+    log(helpers.table_to_json(b))
+  end
+  local result = nil
+  if ap.group.order ~= bp.group.order then
+    return ap.group.order < bp.group.order
+  elseif ap.group.name ~= bp.group.name then
+    return ap.group.name < bp.group.name
+  elseif ap.subgroup.order ~= bp.subgroup.order then
+    return ap.subgroup.order < bp.subgroup.order
+  elseif ap.subgroup.name ~= bp.subgroup.name then
+    return ap.subgroup.name < bp.subgroup.name
+  elseif ap.order ~= bp.order then
+    return ap.order < bp.order
+  else
+    return ap.name < bp.name
+  end
+end
+
+function utils.first_product_proto(products)
+  local product = products[1]
+  if product == nil then
+    return nil
+  elseif product.type == "item" then
+    return prototypes.item[product.name]
+  elseif product.type == "fluid" then
+    return prototypes.fluid[product.name]
+  else
+    return nil
+  end
+end
+
 return utils

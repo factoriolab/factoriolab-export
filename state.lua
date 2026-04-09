@@ -50,6 +50,7 @@ state.producers = {
 }
 state.machines = {
   boiler = {},
+  lab = {},
   offshore_pump = {},
   silo = {}
 }
