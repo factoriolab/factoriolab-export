@@ -1,5 +1,5 @@
 local get_row_fn = require("get-row-fn")
-local process_collection = require("process-collection")
+local iterate_collection = require("iterate-collection")
 local process_categories = require("process-categories")
 local recipes = require("recipes")
 local state = require("state")
@@ -323,19 +323,19 @@ return function()
   -- TODO: Not-recipe recipes
   -- Asteroid recipes (space connection AND space location, ideally?) (process these during location parsing?)
 
-  process_collection(
+  iterate_collection(
     prototypes.recipe,
     process_recipe,
     function()
-      process_collection(
+      iterate_collection(
         prototypes.item,
         process_item_recipes,
         function()
-          process_collection(
+          iterate_collection(
             prototypes.entity,
             process_entity_recipes,
             function()
-              process_collection(prototypes.fluid, process_fluid_recipes, process_categories)
+              iterate_collection(prototypes.fluid, process_fluid_recipes, process_categories)
             end
           )
         end

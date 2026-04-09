@@ -3,7 +3,7 @@ local state = require("state")
 
 local function setup()
   log("init setup")
-  state.player = game.players[1]
+  state.player = game.get_player(1)
   if state.player == nil then
     log("no player found")
     return

@@ -1,4 +1,4 @@
-local process_collection = require("process-collection")
+local iterate_collection = require("iterate-collection")
 local filter_items = require("filter-items")
 local state = require("state")
 local translations = require("translations")
@@ -22,7 +22,7 @@ return function()
       translations.add(proto.localised_name, quality)
     end
 
-    process_collection(prototypes.quality, process_quality, filter_items)
+    iterate_collection(prototypes.quality, process_quality, filter_items)
   else
     script.on_event(defines.events.on_tick, filter_items)
   end

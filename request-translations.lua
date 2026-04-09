@@ -6,7 +6,7 @@ return function()
   log("init request_translations")
   state.print("init request_translations")
 
-  translations.request(state.player, write_icons)
+  translations.request(game.get_player(1), write_icons)
 
   log("end request_translations")
 end

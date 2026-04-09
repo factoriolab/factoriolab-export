@@ -1,4 +1,4 @@
-local process_collection = require("process-collection")
+local iterate_collection = require("iterate-collection")
 local process_items = require("process-items")
 local state = require("state")
 local technologies = require("technologies")
@@ -27,7 +27,7 @@ return function()
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 0.5, proto = proto})
   end
 
-  process_collection(
+  iterate_collection(
     prototypes.technology,
     process_technology,
     function()

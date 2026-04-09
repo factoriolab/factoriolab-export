@@ -1,7 +1,7 @@
 local entities = require("entities")
 local get_row_fn = require("get-row-fn")
 local items = require("items")
-local process_collection = require("process-collection")
+local iterate_collection = require("iterate-collection")
 local process_recipes = require("process-recipes")
 local state = require("state")
 
@@ -101,15 +101,15 @@ return function()
     state.item_map[item.id] = item
   end
 
-  process_collection(
+  iterate_collection(
     prototypes.item,
     process_item,
     function()
-      process_collection(
+      iterate_collection(
         prototypes.entity,
         process_entity,
         function()
-          process_collection(prototypes.fluid, process_fluid, process_recipes)
+          iterate_collection(prototypes.fluid, process_fluid, process_recipes)
         end
       )
     end

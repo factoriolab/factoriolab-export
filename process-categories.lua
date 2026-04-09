@@ -1,5 +1,5 @@
 local process_locations = require("process-locations")
-local process_collection = require("process-collection")
+local iterate_collection = require("iterate-collection")
 local state = require("state")
 local translations = require("translations")
 
@@ -15,7 +15,7 @@ return function()
     translations.add(proto.localised_name, category)
   end
 
-  process_collection(
+  iterate_collection(
     prototypes.item_group,
     process_category,
     function()
