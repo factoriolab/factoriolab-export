@@ -2,9 +2,6 @@ local state = require("state")
 local write_data = require("write-data")
 
 return function()
-  log("init write_icons")
-  state.print("init write_icons")
-
   local sprite_surface = game.create_surface("lab-sprite")
 
   -- Calculate sprite sheet width (height determined by # of loop iterations)
@@ -67,5 +64,4 @@ return function()
   )
 
   script.on_event(defines.events.on_tick, write_data)
-  log("end write_icons")
 end

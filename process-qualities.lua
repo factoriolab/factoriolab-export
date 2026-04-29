@@ -4,10 +4,15 @@ local state = require("state")
 local translations = require("translations")
 
 return function()
-  log("init process_qualities")
-  state.print("init process_qualities")
+  local has_abnormal_quality = false
+  for name, proto in pairs(prototypes.quality) do
+    if not proto.parameter and not proto.hidden and proto.level > 0 then
+      has_abnormal_quality = true
+      break
+    end
+  end
 
-  if #prototypes.quality > 1 then
+  if has_abnormal_quality then
     state.data.qualities = {}
 
     local function process_quality(name, proto)
@@ -26,6 +31,4 @@ return function()
   else
     script.on_event(defines.events.on_tick, filter_items)
   end
-
-  log("end process_qualities")
 end

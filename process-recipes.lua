@@ -5,9 +5,6 @@ local state = require("state")
 local utils = require("utils")
 
 return function()
-  log("init process_recipes")
-  state.print("init process_recipes")
-
   local function process_item_recipes(name, proto)
     if proto.parameter then
       return
@@ -333,5 +330,4 @@ return function()
       )
     end
   )
-  log("end process_recipes")
 end

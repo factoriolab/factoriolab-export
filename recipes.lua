@@ -45,7 +45,7 @@ function recipes.products(products)
     end
 
     if product.extra_count_fraction then
-      amount = product.extra_count_fraction
+      amount = amount + product.extra_count_fraction
     end
 
     if not result[id] then

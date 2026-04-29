@@ -4,9 +4,6 @@ local state = require("state")
 local translations = require("translations")
 
 return function()
-  log("init process_categories")
-  state.print("init process_categories")
-
   local function process_category(name, proto)
     local sprite = "item-group/" .. name
     local category = {id = name, icon = sprite}
@@ -25,5 +22,4 @@ return function()
       script.on_event(defines.events.on_tick, process_locations)
     end
   )
-  log("end process_categories")
 end

@@ -34,9 +34,6 @@ local function parse_asteroid(name)
 end
 
 return function()
-  log("init process_locations")
-  state.print("init process_locations")
-
   local function process_space_location(name, proto)
     if proto.parameter or proto.hidden then
       return
@@ -169,6 +166,4 @@ return function()
       )
     end
   )
-
-  log("end process_locations")
 end

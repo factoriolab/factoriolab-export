@@ -176,14 +176,6 @@ local function machine_base_effect(entity)
   return entity.effect_receiver and entity.effect_receiver.base_effect or nil
 end
 
-local function machine_hide_rate(entity)
-  return entity.type == "asteroid-collector" or nil
-end
-
-local function machine_total_recipe(entity)
-  return entity.type == "agricultural-tower" or nil
-end
-
 local function machine_ingredient_usage(entity)
   local percent = entity.science_pack_drain_rate_percent
   if not percent or percent == 100 then
@@ -258,8 +250,6 @@ function entities.machine(entity, item)
     silo = machine_silo(entity),
     size = utils.size(entity),
     baseEffect = machine_base_effect(entity),
-    hideRate = machine_hide_rate(entity),
-    totalRecipe = machine_total_recipe(entity),
     entityType = entity.type,
     locations = utils.locations(entity),
     ingredientUsage = machine_ingredient_usage(entity)
@@ -307,55 +297,15 @@ function entities.machine(entity, item)
 end
 
 function entities.cargo_wagon(entity)
-  local wagon = {
+  return {
     size = entity.get_inventory_size(defines.inventory.cargo_wagon)
   }
-
-  local quality_record = {}
-  for name, quality in pairs(state.abnormal_qualities) do
-    local variant = {}
-
-    local size = entity.get_inventory_size(defines.inventory.cargo_wagon, name)
-    if wagon.size ~= size then
-      variant.size = size
-    end
-
-    if next(variant) ~= nil then
-      quality_record[name] = variant
-    end
-  end
-
-  if next(quality_record) ~= nil then
-    wagon.qualityRecord = quality_record
-  end
-
-  return wagon
 end
 
 function entities.fluid_wagon(entity)
-  local wagon = {
+  return {
     capacity = entity.get_fluid_capacity()
   }
-
-  local quality_record = {}
-  for name, quality in pairs(state.abnormal_qualities) do
-    local variant = {}
-
-    local capacity = entity.get_fluid_capacity(name)
-    if wagon.capacity ~= capacity then
-      variant.capacity = capacity
-    end
-
-    if next(variant) ~= nil then
-      quality_record[name] = variant
-    end
-  end
-
-  if next(quality_record) ~= nil then
-    wagon.qualityRecord = quality_record
-  end
-
-  return wagon
 end
 
 function inserter_speed(entity, quality)

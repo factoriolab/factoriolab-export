@@ -4,9 +4,6 @@ local state = require("state")
 local translations = require("translations")
 
 return function()
-  log("init finalize_recipes")
-  state.print("init finalize_recipes")
-
   local recipe_row = get_row_fn()
   for _, meta in ipairs(state.recipes_meta) do
     local recipe = meta.recipe
@@ -30,5 +27,4 @@ return function()
   end
 
   script.on_event(defines.events.on_tick, request_translations)
-  log("end finalize_recipes")
 end

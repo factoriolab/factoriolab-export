@@ -5,9 +5,6 @@ local process_recipes = require("process-recipes")
 local state = require("state")
 
 return function()
-  log("init process_items")
-  state.print("init process_items")
-
   local item_map = {}
 
   local function process_item(name, proto)
@@ -53,9 +50,7 @@ return function()
       local item = item_map[name] or entities.item(proto)
       item.pipe = entities.pipe(proto)
     elseif
-      proto.type == "agricultural-tower" or proto.type == "assembling-machine" or proto.type == "asteroid-collector" or
-        proto.type == "boiler" or
-        proto.type == "burner-generator" or
+      proto.type == "assembling-machine" or proto.type == "boiler" or proto.type == "burner-generator" or
         proto.type == "furnace" or
         proto.type == "fusion-generator" or
         proto.type == "fusion-reactor" or
@@ -108,5 +103,4 @@ return function()
       )
     end
   )
-  log("end process_items")
 end

@@ -45,8 +45,7 @@ state.producers = {
   burner = {},
   crafting = {},
   resource = {},
-  resource_fluid = {},
-  asteroid = {}
+  resource_fluid = {}
 }
 state.machines = {
   boiler = {},
@@ -65,6 +64,7 @@ for name, quality in pairs(prototypes.quality) do
   end
 end
 
+-- Intended for debugging only, should not be used in release
 function state.print(message)
   if not state.tick then
     state.tick = game.tick

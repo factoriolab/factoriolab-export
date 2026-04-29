@@ -2,9 +2,6 @@ local sort_items = require("sort-items")
 local state = require("state")
 
 return function()
-  log("init filter_recipes")
-  state.print("init filter_recipes")
-
   local result = {}
   for _, meta in ipairs(state.recipes_meta) do
     local keep = true
@@ -32,5 +29,4 @@ return function()
   state.recipes_meta = result
 
   script.on_event(defines.events.on_tick, sort_items)
-  log("end filter_recipes")
 end

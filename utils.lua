@@ -5,19 +5,11 @@ function convert_energy(energy)
 end
 
 function utils.usage(entity, quality)
-  if entity.type == "asteroid-collector" then
-    return nil
-  end
-
   local usage = entity.get_max_energy_usage(quality)
   return convert_energy(usage)
 end
 
 function utils.drain(entity)
-  if entity.type == "asteroid-collector" then
-    return nil
-  end
-
   local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
   return convert_energy(drain)
 end
@@ -190,9 +182,6 @@ end
 function utils.compare_protos(a, b)
   local ap = a.proto
   local bp = b.proto
-  if bp == nil then
-    log(helpers.table_to_json(b))
-  end
   local result = nil
   if ap.group.order ~= bp.group.order then
     return ap.group.order < bp.group.order
