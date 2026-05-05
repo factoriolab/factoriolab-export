@@ -123,6 +123,11 @@ local function machine_speed(entity, quality)
     local usage = utils.usage(entity, quality)
     local input = input_fluid(entity)
     local fluid = prototypes.fluid[input]
+    if not fluid then
+      -- Invalid boiler, no recipes should be generated
+      return 1
+    end
+
     local diff = entity.target_temperature - fluid.default_temperature
     local energy = diff * fluid.heat_capacity / 1000
     return usage / energy

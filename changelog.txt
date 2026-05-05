@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 2026-05-05
+  Fixed:
+    - Fallback to speed 1 for boilers with no input fluid
+    - Include `item-` prefix when adding rocket launch item to launch recipe
+    - Mark parameter items as removed so that recipes that use those items are filtered out
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
-Date: yyyy-mm-dd
+Date: 2026-05-05
   Changed:
     - Updated to work with FactorioLab 4.x (prerelease)
 ---------------------------------------------------------------------------------------------------

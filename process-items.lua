@@ -8,13 +8,16 @@ return function()
   local item_map = {}
 
   local function process_item(name, proto)
+    local id = "item-" .. name
     if proto.parameter then
+      -- Mark as removed so associated recipes will be filtered out
+      state.items_removed[id] = true
       return
     end
 
     local sprite = "item/" .. name
     local item = {
-      id = "item-" .. name,
+      id = id,
       icon = sprite,
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and

@@ -16,9 +16,10 @@ return function()
       local out, catalyst, total = recipes.products(proto.rocket_launch_products)
       local first_out = next(out)
       local item = state.item_map[first_out]
+      local id = "item-" .. name
 
       for entity_name, info in pairs(state.machines.silo) do
-        local recipe_in = {[name] = 1}
+        local recipe_in = {[id] = 1}
         for item_id, amount in pairs(info.recipe_in) do
           if not recipe_in[item_id] then
             recipe_in[item_id] = 0
@@ -28,7 +29,7 @@ return function()
         end
 
         local recipe = {
-          id = "launch-" .. info.id .. "-" .. name,
+          id = "launch-" .. info.id .. "-" .. id,
           icon = item.icon,
           time = 40.6,
           ["in"] = recipe_in,
