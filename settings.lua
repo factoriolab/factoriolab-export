@@ -2,17 +2,10 @@ data:extend(
   {
     {
       type = "bool-setting",
-      name = "factoriolab-export-disable",
+      name = "factoriolab-export-enabled",
       order = "a",
-      setting_type = "runtime-per-user",
-      default_value = false
-    },
-    {
-      type = "bool-setting",
-      name = "factoriolab-export-pretty-json",
-      order = "b",
-      setting_type = "runtime-per-user",
-      default_value = false
+      setting_type = "runtime-global",
+      default_value = true
     }
   }
 )
