@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 2026-05-05
+  Fixed:
+    - Iterate icons collection while drawing sprites, instead of drawing all during one tick
+    - Handle recipe additional_categories
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2026-05-05
   Fixed:

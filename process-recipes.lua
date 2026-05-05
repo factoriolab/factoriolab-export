@@ -282,6 +282,25 @@ return function()
 
     local sprite = "recipe/" .. name
     local out, catalyst = recipes.products(proto.products)
+
+    local producers = state.producers.crafting[proto.category]
+    for _, additional_category in ipairs(proto.additional_categories) do
+      local additional_producers = state.producers.crafting[additional_category] or {}
+      for _, additional_producer in ipairs(additional_producers) do
+        local included = false
+        for _, producer in ipairs(producers) do
+          if producer == additional_producer then
+            included = true
+            break
+          end
+        end
+
+        if not included then
+          table.insert(producers, additional_producer)
+        end
+      end
+    end
+
     local recipe = {
       id = name,
       icon = sprite,
