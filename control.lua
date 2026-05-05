@@ -2,6 +2,10 @@ local process_technologies = require("process-technologies")
 local state = require("state")
 
 local function setup()
+  if not settings.global["factoriolab-export-enabled"].value then
+    return
+  end
+
   state.player = game.get_player(1)
   if state.player == nil then
     log({"factoriolab-export.no-player-found"})
