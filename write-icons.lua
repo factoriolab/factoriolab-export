@@ -64,8 +64,13 @@ return function()
       }
     )
 
-    game.delete_surface("lab-sprite")
-    script.on_event(defines.events.on_tick, write_data)
+    script.on_event(
+      defines.events.on_tick,
+      function()
+        game.delete_surface("lab-sprite")
+        script.on_event(defines.events.on_tick, write_data)
+      end
+    )
   end
 
   local icon_map = {}

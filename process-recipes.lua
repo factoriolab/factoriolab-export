@@ -310,7 +310,7 @@ return function()
       catalyst = catalyst,
       disallowedEffects = utils.disallowed_effects(proto),
       locations = utils.locations(proto),
-      producers = state.producers.crafting[proto.category],
+      producers = producers,
       flags = {}
     }
 

@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.3
+Date: 2026-05-06
+  Fixed:
+    - Properly assign producers list including additional_categories
+    - Delay delete of sprite icon surface until next tick after screenshot
+---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 2026-05-05
   Fixed:
