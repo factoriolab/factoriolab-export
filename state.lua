@@ -57,6 +57,8 @@ state.machines = {
 state.item_map = {}
 -- Tick of last log message. number | nil
 state.tick = nil
+-- Number of entries to process per tick
+state.entries_per_tick = 200
 
 for name, quality in pairs(prototypes.quality) do
   if quality.level > 0 then

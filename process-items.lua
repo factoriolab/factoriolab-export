@@ -27,10 +27,12 @@ return function()
 
     if proto.fuel_value > 0 then
       item.fuel = items.fuel(proto)
+      state.items_used[item.id] = true
     end
 
     if proto.type == "module" then
       item.module = items.module(proto)
+      state.items_used[item.id] = true
     end
 
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
@@ -46,12 +48,15 @@ return function()
     if proto.type == "beacon" then
       local item = item_map[name] or entities.item(proto)
       item.beacon = entities.beacon(proto)
+      state.items_used[item.id] = true
     elseif proto.type == "transport-belt" then
       local item = item_map[name] or entities.item(proto)
       item.belt = entities.belt(proto)
+      state.items_used[item.id] = true
     elseif proto.type == "pump" then
       local item = item_map[name] or entities.item(proto)
       item.pipe = entities.pipe(proto)
+      state.items_used[item.id] = true
     elseif
       proto.type == "assembling-machine" or proto.type == "boiler" or proto.type == "burner-generator" or
         proto.type == "furnace" or
@@ -66,15 +71,19 @@ return function()
      then
       local item = item_map[name] or entities.item(proto)
       item.machine = entities.machine(proto, item)
+      state.items_used[item.id] = true
     elseif proto.type == "cargo-wagon" then
       local item = item_map[name] or entities.item(proto)
       item.cargoWagon = entities.cargo_wagon(proto)
+      state.items_used[item.id] = true
     elseif proto.type == "fluid-wagon" then
       local item = item_map[name] or entities.item(proto)
       item.fluidWagon = entities.fluid_wagon(proto)
+      state.items_used[item.id] = true
     elseif proto.type == "inserter" then
       local item = item_map[name] or entities.item(proto)
       item.inserter = entities.inserter(proto)
+      state.items_used[item.id] = true
     end
   end
 

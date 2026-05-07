@@ -12,21 +12,23 @@ function entities.item(entity)
   }
   table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
   state.item_map[item.id] = item
-  state.items_used[item.id] = true
   return item
 end
 
 function entities.beacon(entity)
   local beacon = {
     effectivity = entity.distribution_effectivity,
-    modules = utils.modules(entity),
+    modules = utils.modules(entity) or 0,
     range = entity.get_supply_area_distance(),
     type = utils.energy_type(entity),
     usage = utils.usage(entity),
     disallowedEffects = utils.disallowed_effects(entity),
-    size = utils.size(entity),
-    profile = entity.profile
+    size = utils.size(entity)
   }
+
+  if next(entity.profile) then
+    beacon.profile = entity.profile
+  end
 
   local quality_record = {}
   for name, quality in pairs(state.abnormal_qualities) do

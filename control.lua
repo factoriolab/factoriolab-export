@@ -13,6 +13,8 @@ local function setup()
   end
 
   state.player.print({"factoriolab-export.initiate"})
+
+  state.entries_per_tick = settings.global["factoriolab-export-entries-per-tick"].value
   if script.feature_flags.space_travel then
     table.insert(state.data.flags, "rockets")
   end

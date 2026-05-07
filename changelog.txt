@@ -1,78 +1,89 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.4
+Date: 2026-05-07
+  Features:
+    - Added entries per tick setting to manage processing speed and performance impact
+  Bugfixes:
+    - Handle nil planet.map_gen_settings.autoplace_settings entries
+    - Fix processing of additional_categories to avoid unintended propagation
+    - Don't assign to recipe producers field unless entries exist
+    - Do not filter out items that have an associated entity
+    - Don't assign to beacon profile field unless profile contains entries
+    - Fall back to zero modules on beacons with nil module_inventory_size
+---------------------------------------------------------------------------------------------------
 Version: 2.0.3
 Date: 2026-05-06
-  Fixed:
+  Bugfixes:
     - Properly assign producers list including additional_categories
     - Delay delete of sprite icon surface until next tick after screenshot
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 2026-05-05
-  Fixed:
+  Bugfixes:
     - Iterate icons collection while drawing sprites, instead of drawing all during one tick
     - Handle recipe additional_categories
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2026-05-05
-  Fixed:
+  Bugfixes:
     - Fallback to speed 1 for boilers with no input fluid
     - Include `item-` prefix when adding rocket launch item to launch recipe
     - Mark parameter items as removed so that recipes that use those items are filtered out
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 2026-05-05
-  Changed:
+  Major Features:
     - Updated to work with FactorioLab 4.x (prerelease)
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.7
 Date: 2023-02-16
-  Fixed:
+  Bugfixes:
     - Resolved an issue where duplicate products were not correctly summed
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.6
 Date: 2023-02-01
-  Fixed:
+  Bugfixes:
     - Resolved issue where entity names differing from item names caused a crash
     - Export now tracks boiler and offshore pump item names in addition to entities
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.5
 Date: 2022-09-29
-  Added:
+  Features:
     - Include disallowed effects on factories and beacons
     - Include recipe categories and sort recipes by category
-  Changed:
+  Changes:
     - Updated step 5 of README on adding a data set to include adding mod `id` to the hash
-  Removed:
     - Removed `color` field from icon data
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2022-06-08
-  Changed:
+  Changes:
     - Include catalyst_amount in recipe data
-  Fixed:
+  Bugfixes:
     - Improved calculation of icon overflow to catch additional cases
     - Added check for duplicate icon ids when creating category icons
     - Added check to exclude recipes with products whose amounts total to zero
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.3
 Date: 2022-06-06
-  Changed:
+  Changes:
     - Include Krastorio 2 'to-matter' recipes in default disabled recipes
-  Fixed:
+  Bugfixes:
     - Fixed an issue where silo fixed recipes were sometimes not included
     - Now checks first index of icons list for offsets that require scaling
     - Recipes with no inputs now generate `"in":{}` instead of `"in":[]`
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2022-06-01
-  Changed:
+  Changes:
     - Simplify handling for case where first icon scale == 1
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2022-06-01
-  Fixed:
+  Bugfixes:
     - Handle an additional icon edge case when first icon scale == 1
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2022-06-01
-  Added:
+  Major Features:
     - Initial release

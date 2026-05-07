@@ -283,22 +283,26 @@ return function()
     local sprite = "recipe/" .. name
     local out, catalyst = recipes.products(proto.products)
 
-    local producers = state.producers.crafting[proto.category]
-    for _, additional_category in ipairs(proto.additional_categories) do
-      local additional_producers = state.producers.crafting[additional_category] or {}
-      for _, additional_producer in ipairs(additional_producers) do
-        local included = false
-        for _, producer in ipairs(producers) do
-          if producer == additional_producer then
-            included = true
-            break
-          end
-        end
-
-        if not included then
-          table.insert(producers, additional_producer)
-        end
+    local producer_map = {}
+    function add_category(category)
+      local producers = state.producers.crafting[category]
+      if not producers then
+        return
       end
+
+      for _, producer in ipairs(producers) do
+        producer_map[producer] = true
+      end
+    end
+
+    add_category(proto.category)
+    for _, additional_category in ipairs(proto.additional_categories) do
+      add_category(additional_category)
+    end
+
+    local producers = {}
+    for producer, _ in pairs(producer_map) do
+      table.insert(producers, producer)
     end
 
     local recipe = {
@@ -309,23 +313,26 @@ return function()
       out = out,
       catalyst = catalyst,
       disallowedEffects = utils.disallowed_effects(proto),
-      locations = utils.locations(proto),
-      producers = producers,
-      flags = {}
+      locations = utils.locations(proto)
     }
 
+    local flags = {}
     if proto.category == "recycling" then
-      table.insert(recipe.flags, "recycling")
+      table.insert(flags, "recycling")
     else
       recipes.store_used_items(recipe)
     end
 
     if state.recipes_locked[name] then
-      table.insert(recipe.flags, "locked")
+      table.insert(flags, "locked")
     end
 
-    if next(recipe.flags) == nil then
-      recipe.flags = nil
+    if next(producers) then
+      recipe.producers = producers
+    end
+
+    if next(flags) then
+      recipe.flags = flags
     end
 
     table.insert(state.recipes_meta, {recipe = recipe, sprite = sprite, scale = 2, proto = proto})

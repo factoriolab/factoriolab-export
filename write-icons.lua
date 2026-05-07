@@ -78,6 +78,5 @@ return function()
     icon_map[icon.sprite] = icon
   end
 
-  log(helpers.table_to_json(icon_map))
   iterate_collection(icon_map, process_icon, finalize_icons)
 end

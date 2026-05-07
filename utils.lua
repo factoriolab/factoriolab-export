@@ -148,7 +148,7 @@ end
 
 function utils.has_ocean(planet, name)
   if
-    planet.type ~= "planet" or not planet.map_gen_settings or
+    planet.type ~= "planet" or not planet.map_gen_settings or not planet.map_gen_settings.autoplace_settings.tile or
       not planet.map_gen_settings.autoplace_settings.tile.settings
    then
     return false
@@ -166,7 +166,7 @@ end
 
 function utils.has_resource(planet, name)
   if
-    planet.type ~= "planet" or not planet.map_gen_settings or
+    planet.type ~= "planet" or not planet.map_gen_settings or not planet.map_gen_settings.autoplace_settings.entity or
       not planet.map_gen_settings.autoplace_settings.entity.settings
    then
     return false
