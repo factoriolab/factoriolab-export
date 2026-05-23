@@ -320,7 +320,7 @@ function inserter_speed(entity, quality)
   local ticks_per_rotation = math.floor(1 / rotations_per_tick / 2) * 2
   local rotations_per_sec = 1 / ticks_per_rotation * 60
   local degrees_per_sec = rotations_per_sec * 360
-  return degrees_per_sec
+  return utils.json_number(degrees_per_sec)
 end
 
 function entities.inserter(entity)

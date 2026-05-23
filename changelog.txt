@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.5
+Date: 2026-05-23
+  Bugfixes:
+    - Handle inf / -inf inserter speeds, which were serializing to invalid JSON, this fix may need to be applied to other numeric fields as well
+---------------------------------------------------------------------------------------------------
 Version: 2.0.4
 Date: 2026-05-07
   Features:

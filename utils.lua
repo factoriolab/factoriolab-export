@@ -211,4 +211,14 @@ function utils.first_product_proto(products)
   end
 end
 
+function utils.json_number(value)
+  if value == math.huge then
+    return math.maxinteger
+  elseif value == -math.huge then
+    return -math.maxinteger
+  else
+    return value
+  end
+end
+
 return utils
