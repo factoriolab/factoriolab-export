@@ -27,3 +27,5 @@ This mod exports Factorio data to a JSON file and icon sprite sheet that can be 
   - Mining machine resource drain percent
   - Quality item durability (e.g. quality science durability)
   - Quality custom upgrade probability and next level (these are assumed to be 10% and in order of level)
+  - Fluid-based fuels
+

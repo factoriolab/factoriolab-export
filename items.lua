@@ -6,7 +6,8 @@ function items.fuel(item)
   return {
     category = item.fuel_category,
     value = item.fuel_value / 1000000,
-    result = item.burnt_result and "item-" .. item.burnt_result.name or nil
+    result = item.burnt_result and "item-" .. item.burnt_result.name or nil,
+    pollutionMultiplier = item.fuel_emissions_multiplier ~= 1 and item.fuel_emissions_multiplier or nil
   }
 end
 

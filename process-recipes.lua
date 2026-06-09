@@ -120,7 +120,8 @@ return function()
         out = out,
         catalyst = catalyst,
         cost = 100 / total,
-        locations = utils.locations(proto.plant_result)
+        locations = utils.locations(proto.plant_result),
+        flags = {"showCount"}
       }
 
       recipes.store_used_items(recipe)

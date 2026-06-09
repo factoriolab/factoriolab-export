@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.6
+Date: 2026-06-09
+  Minor features:
+    - Add pollutionMultiplier to fuels, if ~= 1
+    - Add "showCount" flag to agriculture recipes, supporting fix for GH issue #1850
+---------------------------------------------------------------------------------------------------
 Version: 2.0.5
 Date: 2026-05-23
   Bugfixes:
