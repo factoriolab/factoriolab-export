@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.0
+Date: 2026-07-01
+  Features:
+    - Added keyboard and quickbar shortcut to run export manually
+    - Added custom icon for this mod
+  Changes:
+    - Export no longer starts automatically on save load
+    - Removed "enabled" setting as it is no longer relevant now that export is run explicitly
+  Bugfixes:
+    - Fixed an issue where translations could be requested repeatedly in a loop
+    - Fixed an issue where translation results were not handled properly when other mods also requested translations
+---------------------------------------------------------------------------------------------------
 Version: 2.0.6
 Date: 2026-06-09
   Minor features:

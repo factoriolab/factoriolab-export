@@ -19,6 +19,9 @@ function translations.request(player, nextFn)
     defines.events.on_string_translated,
     function(e)
       local i = requests[e.id]
+      if i == nil then
+        return
+      end
       requests[e.id] = nil
       items[i].name = e.result
 
@@ -26,6 +29,7 @@ function translations.request(player, nextFn)
         localised_strings = {}
         items = {}
         requests = {}
+        script.on_event(defines.events.on_string_translated, nil)
         script.on_event(defines.events.on_tick, nextFn)
       end
     end

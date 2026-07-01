@@ -1,17 +1,8 @@
 local process_technologies = require("process-technologies")
 local state = require("state")
 
-local function setup()
-  if not settings.global["factoriolab-export-enabled"].value then
-    return
-  end
-
-  state.player = game.get_player(1)
-  if state.player == nil then
-    log({"factoriolab-export.no-player-found"})
-    return
-  end
-
+local function setup(player)
+  state.player = player
   state.player.print({"factoriolab-export.initiate"})
 
   state.entries_per_tick = settings.global["factoriolab-export-entries-per-tick"].value
@@ -22,4 +13,22 @@ local function setup()
   script.on_event(defines.events.on_tick, process_technologies)
 end
 
-script.on_event(defines.events.on_tick, setup)
+-- Quickbar shortcut
+script.on_event(
+  defines.events.on_lua_shortcut,
+  function(event)
+    if event.prototype_name == "factoriolab-export-run" then
+      local player = game.get_player(event.player_index)
+      setup(player)
+    end
+  end
+)
+
+-- Keyboard shortcuts
+script.on_event(
+  "factoriolab-export-run",
+  function(event)
+    local player = game.get_player(event.player_index)
+    setup(player)
+  end
+)
