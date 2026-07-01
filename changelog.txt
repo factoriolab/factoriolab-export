@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.1.1
+Date: 2026-07-01
+  Changes:
+    - Updated to be compatible with Factorio 2.1, details below
+    - Handles new recipe categories as table
+    - Handles item product independent_probability and shared_probability
+    - Uses default_rocket_lift_weight in place of rocket_lift_weight
+    - Uses fixed_recipe directly as recipe prototype
+    - No longer divides quality effect by 10
+---------------------------------------------------------------------------------------------------
 Version: 2.1.0
 Date: 2026-07-01
   Features:

@@ -21,7 +21,7 @@ return function()
       icon = sprite,
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and
-        math.floor(prototypes.utility_constants.rocket_lift_weight / proto.weight) or
+        math.floor(prototypes.utility_constants.default_rocket_lift_weight / proto.weight) or
         nil
     }
 

@@ -296,9 +296,12 @@ return function()
       end
     end
 
-    add_category(proto.category)
-    for _, additional_category in ipairs(proto.additional_categories) do
-      add_category(additional_category)
+    local recycling = false
+    for _, category in ipairs(proto.categories) do
+      if category == "recycling" then
+        recycling = true
+      end
+      add_category(category)
     end
 
     local producers = {}
@@ -318,7 +321,7 @@ return function()
     }
 
     local flags = {}
-    if proto.category == "recycling" then
+    if recycling then
       table.insert(flags, "recycling")
     else
       recipes.store_used_items(recipe)

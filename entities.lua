@@ -225,7 +225,7 @@ local function process_producers(entity, item)
   elseif entity.type == "rocket-silo" then
     -- TODO: Handle silos without fixed part recipes?
     if entity.fixed_recipe then
-      local recipe = prototypes.recipe[entity.fixed_recipe]
+      local recipe = entity.fixed_recipe
       local out, catalyst, total = recipes.products(recipe.products)
       local part
       local recipe_in = {}

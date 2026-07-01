@@ -40,8 +40,12 @@ function recipes.products(products)
       amount = (product.amount_max + product.amount_min) / 2
     end
 
-    if product.probability then
-      amount = amount * product.probability
+    if product.independent_probability then
+      amount = amount * product.independent_probability
+    end
+
+    if product.shared_probability then
+      amount = amount * (product.shared_probability.max - product.shared_probability.min)
     end
 
     if product.extra_count_fraction then
@@ -72,7 +76,16 @@ function recipes.products(products)
 end
 
 function recipes.save(recipe, localised_name, sprite, scale)
-  if not proto or proto.category ~= "recycling" then
+  local recycling = false
+  if proto then
+    for _, category in ipairs(proto.categories) do
+      if category == "recycling" then
+        recycling = true
+      end
+    end
+  end
+
+  if not proto or recycling then
     for id, _ in pairs(recipe["in"]) do
       state.items_used[id] = true
     end

@@ -13,21 +13,12 @@ end
 
 function items.module(item)
   local module = item.get_module_effects()
-
-  if module.quality then
-    module.quality = module.quality / 10
-  end
-
   local quality_record = {}
   for name, quality in pairs(state.abnormal_qualities) do
     local variant = {}
 
     local effects = item.get_module_effects(name)
     for effName, effValue in pairs(effects) do
-      if effName == "quality" then
-        effValue = effValue / 10
-      end
-
       if module[effName] ~= effValue then
         variant[effName] = effValue
       end
