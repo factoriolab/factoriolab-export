@@ -69,9 +69,12 @@ return function()
         proto.type == "reactor" or
         proto.type == "rocket-silo"
      then
-      local item = item_map[name] or entities.item(proto)
-      item.machine = entities.machine(proto, item)
-      state.items_used[item.id] = true
+      local machine = entities.machine(proto, item)
+      if machine then
+        local item = item_map[name] or entities.item(proto)
+        item.machine = machine
+        state.items_used[item.id] = true
+      end
     elseif proto.type == "cargo-wagon" then
       local item = item_map[name] or entities.item(proto)
       item.cargoWagon = entities.cargo_wagon(proto)

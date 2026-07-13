@@ -245,8 +245,14 @@ end
 
 function entities.machine(entity, item)
   local usage = utils.usage(entity)
+  local speed = machine_speed(entity)
+
+  if speed == 0 then
+    return nil
+  end
+
   local machine = {
-    speed = machine_speed(entity),
+    speed = speed,
     modules = utils.modules(entity),
     disallowedEffects = utils.disallowed_effects(entity),
     type = utils.energy_type(entity),
