@@ -18,7 +18,11 @@ state.data = {
   icons = {},
   items = {},
   recipes = {},
-  locations = {}
+  locations = {},
+  defaults = {
+    researchedTechnologies = {},
+    recipeProductivity = {}
+  }
 }
 -- Optional flags to be added based on data. Record<string, true>
 state.flags = {}

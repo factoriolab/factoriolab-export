@@ -21,6 +21,11 @@ return function()
     state.items_used[item.id] = true
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 0.5, proto = proto})
 
+    local technology = state.player.force.technologies[name]
+    if technology.researched or technology.level > 1 then
+      table.insert(state.data.defaults.researchedTechnologies, id)
+    end
+
     if #proto.research_unit_ingredients > 0 then
       local ingredients = {}
       for _, ingredient in ipairs(proto.research_unit_ingredients) do
@@ -46,6 +51,10 @@ return function()
       table.insert(state.recipes_meta, {recipe = recipe, proto = proto})
     end
   end
+
+  state.data.defaults.miningBonus = state.player.force.mining_drill_productivity_bonus * 100
+  state.data.defaults.researchBonus = state.player.force.laboratory_speed_modifier * 100
+  state.data.defaults.researchProductivity = state.player.force.laboratory_productivity_bonus * 100
 
   iterate_collection(
     prototypes.technology,

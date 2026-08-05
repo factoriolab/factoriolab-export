@@ -340,6 +340,11 @@ return function()
     end
 
     table.insert(state.recipes_meta, {recipe = recipe, sprite = sprite, scale = 2, proto = proto})
+
+    local forceRecipe = state.player.force.recipes[name]
+    if (forceRecipe and forceRecipe.productivity_bonus > 0) then
+      state.data.defaults.recipeProductivity[recipe.id] = forceRecipe.productivity_bonus * 100
+    end
   end
 
   iterate_collection(

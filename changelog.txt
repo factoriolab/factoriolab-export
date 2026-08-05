@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.0
+Date: 2026-07-04
+  Features:
+    - Export now includes researched technologies, mining bonus, research speed bonus, research productivity bonus, and recipe productivity bonuses
+  Bugfixes:
+    - Fix machine export null reference issue
+---------------------------------------------------------------------------------------------------
 Version: 2.1.2
 Date: 2026-07-06
   Bugfixes:
