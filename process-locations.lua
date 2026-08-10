@@ -16,10 +16,13 @@ local function parse_asteroid(name)
   if asteroid.dying_trigger_effect then
     for _, effect in ipairs(asteroid.dying_trigger_effect) do
       if effect.type == "create-asteroid-chunk" then
-        local id = "item-" .. effect.asteroid_name
-        local count = (effect.offsets and #effect.offsets) or 1
-        local value = count * effect.probability
-        recipes.add_value(asteroid_results[name], id, value)
+        local chunk = prototypes.asteroid_chunk[effect.asteroid_name]
+        if chunk.mineable_properties.minable then
+          local chunk_out, catalyst, total = recipes.products(chunk.mineable_properties.products)
+          for key, value in pairs(chunk_out) do
+            recipes.add_value(asteroid_results[name], key, value * effect.probability)
+          end
+        end
       elseif effect.type == "create-entity" then
         parse_asteroid(effect.entity_name)
 
@@ -51,8 +54,13 @@ return function()
       local out = {}
       for _, spawn in ipairs(proto.asteroid_spawn_definitions) do
         if spawn.type == "asteroid-chunk" then
-          local id = "item-" .. spawn.asteroid
-          recipes.add_value(out, id, spawn.probability)
+          local chunk = prototypes.asteroid_chunk[spawn.asteroid]
+          if chunk.mineable_properties.minable then
+            local chunk_out, catalyst, total = recipes.products(chunk.mineable_properties.products)
+            for key, value in pairs(chunk_out) do
+              recipes.add_value(out, key, value * spawn.probability)
+            end
+          end
         else
           parse_asteroid(spawn.asteroid)
           for key, value in pairs(asteroid_results[spawn.asteroid]) do

@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.3
+Date: 2026-08-10
+  Bugfixes:
+    - Parse asteroid chunk mineable_properties rather than assuming asteroid chunk item exists
+    - Apply stack size 1 to entities without corresponding items so they are not considered fluids
+---------------------------------------------------------------------------------------------------
 Version: 2.2.2
 Date: 2026-08-10
   Bugfixes:

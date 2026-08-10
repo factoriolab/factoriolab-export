@@ -8,7 +8,8 @@ function entities.item(entity)
   local sprite = "entity/" .. entity.name
   local item = {
     id = "entity-" .. entity.name,
-    icon = sprite
+    icon = sprite,
+    stack = 1
   }
   table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
   state.item_map[item.id] = item
