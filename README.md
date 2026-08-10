@@ -5,6 +5,7 @@ This mod exports Factorio data to a JSON file and icon sprite sheet that can be 
 ## How to use
 
 1. Install the mod, and load a save file or start a new game.
+1. The mod adds a button to the toolbar to initiate an export. Click the button to start an export.
 1. You should see messages in the console indicating data export is beginning, and when complete.
 1. Open [FactorioLab](https://factoriolab.github.io), and in the Game selection, choose "Custom".
 1. If you have not used "Custom" before, you will be prompted to load files. If you have already loaded files before and wish to load new custom data, open Settings and click "Select custom data".
