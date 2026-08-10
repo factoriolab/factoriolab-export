@@ -129,9 +129,9 @@ function modules(entity, quality)
   if quality and entity.quality_affects_module_slots then
     if quality.beacon_module_slots_bonus and entity.type == "beacon" then
       return entity.module_inventory_size + quality.beacon_module_slots_bonus
-    elseif quality.crafting_machine_slots_bonus and utils.is_crafting_machine(entity) then
+    elseif quality.crafting_machine_module_slots_bonus and utils.is_crafting_machine(entity) then
       return entity.module_inventory_size + quality.crafting_machine_module_slots_bonus
-    elseif quality.mining_drill_slots_bonus and entity.type == "mining-drill" then
+    elseif quality.mining_drill_module_slots_bonus and entity.type == "mining-drill" then
       return entity.module_inventory_size + quality.mining_drill_module_slots_bonus
     elseif quality.lab_module_slots_bonus and entity.type == "lab" then
       return entity.module_inventory_size + quality.lab_module_slots_bonus
