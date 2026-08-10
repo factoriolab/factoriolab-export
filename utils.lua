@@ -110,7 +110,7 @@ function utils.locations(entity)
     end
   end
 
-  if #result == #prototypes.space_location + #prototypes.surface then
+  if #result == #prototypes.space_location + #prototypes.surface or #result == 0 then
     return nil
   end
 
