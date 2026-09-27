@@ -9,7 +9,7 @@ function entities.item(entity)
   local item = {
     id = "entity-" .. entity.name,
     icon = sprite,
-    stack = 1
+    types = { entity.type }
   }
   table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
   state.item_map[item.id] = item
@@ -67,12 +67,13 @@ function entities.beacon(entity)
 end
 
 function entities.belt(entity)
-  return {speed = entity.belt_speed * 8 * 60}
+  return {itemTypes = {"item"}, speed = entity.belt_speed * 8 * 60}
 end
 
 function entities.pipe(entity)
   local speed_num = entity.get_pumping_speed()
   local pipe = {
+    itemTypes = {"fluid"},
     speed = speed_num * 60
   }
 
@@ -139,19 +140,19 @@ local function machine_speed(entity, quality)
   end
 end
 
-local function machine_fuel_categories(entity)
+local function machine_fuel_types(entity)
   -- TODO: Handle heat_energy_source_prototype, fluid_energy_source_prototype
   if not entity.burner_prototype or not entity.burner_prototype.fuel_categories then
     return nil
   end
 
-  local fuel_categories = {}
+  local fuel_types = {}
 
   for name, _ in pairs(entity.burner_prototype.fuel_categories) do
-    table.insert(fuel_categories, name)
+    table.insert(fuel_types, name)
   end
 
-  return fuel_categories
+  return fuel_types
 end
 
 local function pollution(energy_source, usage)
@@ -257,7 +258,7 @@ function entities.machine(entity, item)
     modules = utils.modules(entity),
     disallowedEffects = utils.disallowed_effects(entity),
     type = utils.energy_type(entity),
-    fuelCategories = machine_fuel_categories(entity),
+    fuelTypes = machine_fuel_types(entity),
     usage = utils.usage(entity),
     drain = utils.drain(entity),
     pollution = machine_pollution(entity),
@@ -312,12 +313,15 @@ end
 
 function entities.cargo_wagon(entity)
   return {
-    size = entity.get_inventory_size(defines.inventory.cargo_wagon)
+    itemTypes = {"item"},
+    capacity = entity.get_inventory_size(defines.inventory.cargo_wagon),
+    capacityType = "stacks"
   }
 end
 
 function entities.fluid_wagon(entity)
   return {
+    itemTypes = {"fluid"},
     capacity = entity.get_fluid_capacity()
   }
 end

@@ -53,8 +53,22 @@ return function()
 
     if proto.burnt_result then
       -- Burn recipes
-      local producers = state.producers.burner[proto.fuel_category]
-      if producers then
+      local producer_map = {}
+      for _, fuel_category in ipairs(proto.fuel_categories) do
+        local category_producers = state.producers.burner[fuel_category]
+        if category_producers then
+          for _, producer in ipairs(category_producers) do
+            producer_map[producer] = true
+          end
+        end
+      end
+      
+      local producers = {}
+      for producer, _ in pairs(producer_map) do
+        table.insert(producers, producer)
+      end
+
+      if #producers > 0 then
         local item = state.item_map["item-" .. proto.burnt_result.name]
 
         local recipe = {

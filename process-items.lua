@@ -19,6 +19,7 @@ return function()
     local item = {
       id = id,
       icon = sprite,
+      types = { "item" },
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and
         math.floor(prototypes.utility_constants.default_rocket_lift_weight / proto.weight) or
@@ -55,7 +56,7 @@ return function()
       state.items_used[item.id] = true
     elseif proto.type == "pump" then
       local item = item_map[name] or entities.item(proto)
-      item.pipe = entities.pipe(proto)
+      item.belt = entities.pipe(proto)
       state.items_used[item.id] = true
     elseif
       proto.type == "assembling-machine" or proto.type == "boiler" or proto.type == "burner-generator" or
@@ -77,11 +78,11 @@ return function()
       end
     elseif proto.type == "cargo-wagon" then
       local item = item_map[name] or entities.item(proto)
-      item.cargoWagon = entities.cargo_wagon(proto)
+      item.wagon = entities.cargo_wagon(proto)
       state.items_used[item.id] = true
     elseif proto.type == "fluid-wagon" then
       local item = item_map[name] or entities.item(proto)
-      item.fluidWagon = entities.fluid_wagon(proto)
+      item.wagon = entities.fluid_wagon(proto)
       state.items_used[item.id] = true
     elseif proto.type == "inserter" then
       local item = item_map[name] or entities.item(proto)
@@ -98,7 +99,8 @@ return function()
     local sprite = "fluid/" .. name
     local item = {
       id = "fluid-" .. name,
-      icon = sprite
+      icon = sprite,
+      types = { "fluid" }
     }
 
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
