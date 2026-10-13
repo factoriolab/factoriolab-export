@@ -62,7 +62,7 @@ return function()
           end
         end
       end
-      
+
       local producers = {}
       for producer, _ in pairs(producer_map) do
         table.insert(producers, producer)
@@ -163,7 +163,7 @@ return function()
         local first_out = next(out)
         local item = state.item_map[first_out]
 
-        local producers = state.producers.resource[proto.resource_category]
+        local producers = state.producers.resource[proto.resource_category] or {}
         local recipe_in = {}
         if proto.mineable_properties.required_fluid and proto.mineable_properties.fluid_amount then
           recipe_in["fluid-" .. proto.mineable_properties.required_fluid] = proto.mineable_properties.fluid_amount
