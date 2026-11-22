@@ -1,19 +1,5 @@
 local utils = {}
 
-function convert_energy(energy)
-  return energy and energy > 0 and energy / 1000 * 60 or nil
-end
-
-function utils.usage(entity, quality)
-  local usage = entity.get_max_energy_usage(quality)
-  return convert_energy(usage)
-end
-
-function utils.drain(entity)
-  local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
-  return convert_energy(drain)
-end
-
 function utils.disallowed_effects(entity)
   if not entity.allowed_effects then
     return nil
@@ -115,10 +101,6 @@ function utils.locations(entity)
   end
 
   return result
-end
-
-function utils.energy_type(entity)
-  return entity.electric_energy_source_prototype and "electric" or entity.burner_prototype and "burner" or nil
 end
 
 function utils.is_crafting_machine(entity)

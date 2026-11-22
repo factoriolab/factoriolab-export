@@ -19,7 +19,7 @@ return function()
     local item = {
       id = id,
       icon = sprite,
-      types = { "item" },
+      types = {"item"},
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and
         math.floor(prototypes.utility_constants.default_rocket_lift_weight / proto.weight) or
@@ -100,7 +100,7 @@ return function()
     local item = {
       id = "fluid-" .. name,
       icon = sprite,
-      types = { "fluid" }
+      types = {"fluid"}
     }
 
     table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})

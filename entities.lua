@@ -4,12 +4,58 @@ local utils = require("utils")
 
 local entities = {}
 
+function convert_energy(energy)
+  return energy and energy > 0 and energy / 1000 * 60 or nil
+end
+
+function get_usage(entity, quality)
+  local usage = entity.get_max_energy_usage(quality)
+  return convert_energy(usage)
+end
+
+function entity_usage(entity, quality)
+  return entity.electric_energy_source_prototype and get_usage(entity, quality)
+end
+
+function entity_drain(entity)
+  local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
+  return convert_energy(drain)
+end
+
+function entity_burner(entity, quality)
+  if entity.type == "fusion-reactor" then
+    local fluid
+
+    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "output" then
+        fluid = fluidbox.filter
+        break
+      end
+    end
+
+    if fluid == nil then
+      return nil
+    end
+
+    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality) * 60
+    local kj_energy = fluid.heat_capacity / 1000
+    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
+    return energy
+  end
+
+  return entity.burner_prototype and get_usage(entity, quality)
+end
+
+function entity_heat(entity, quality)
+  return entity.heat_energy_source_prototype and get_usage(entity, quality)
+end
+
 function entities.item(entity)
   local sprite = "entity/" .. entity.name
   local item = {
     id = "entity-" .. entity.name,
     icon = sprite,
-    types = { entity.type }
+    types = {entity.type}
   }
   table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
   state.item_map[item.id] = item
@@ -21,8 +67,7 @@ function entities.beacon(entity)
     effectivity = entity.distribution_effectivity,
     modules = utils.modules(entity) or 0,
     range = entity.get_supply_area_distance(),
-    type = utils.energy_type(entity),
-    usage = utils.usage(entity),
+    usage = entity_usage(entity),
     disallowedEffects = utils.disallowed_effects(entity),
     size = utils.size(entity)
   }
@@ -49,7 +94,7 @@ function entities.beacon(entity)
       variant.range = range
     end
 
-    local usage = utils.usage(entity, name)
+    local usage = entity_usage(entity, name)
     if usage ~= beacon.usage then
       variant.usage = usage
     end
@@ -124,17 +169,21 @@ local function machine_speed(entity, quality)
   elseif entity.type == "offshore-pump" then
     return entity.get_pumping_speed(quality) * 60
   elseif entity.type == "boiler" then
-    local usage = utils.usage(entity, quality)
-    local input = input_fluid(entity)
-    local fluid = prototypes.fluid[input]
-    if not fluid then
-      -- Invalid boiler, no recipes should be generated
-      return 1
+    if quality then
+      local base_usage = get_usage(entity)
+      local quality_usage = get_usage(entity, quality)
+      return quality_usage / base_usage
     end
 
-    local diff = entity.target_temperature - fluid.default_temperature
-    local energy = diff * fluid.heat_capacity / 1000
-    return usage / energy
+    return 1
+  elseif entity.type == "fusion-reactor" then
+    if quality then
+      local base_burner = entity_burner(entity)
+      local quality_burner = entity_burner(entity, quality)
+      return quality_burner / base_burner
+    end
+
+    return 1
   else
     return 1
   end
@@ -246,7 +295,6 @@ local function process_producers(entity, item)
 end
 
 function entities.machine(entity, item)
-  local usage = utils.usage(entity)
   local speed = machine_speed(entity)
 
   if speed == 0 then
@@ -257,15 +305,16 @@ function entities.machine(entity, item)
     speed = speed,
     modules = utils.modules(entity),
     disallowedEffects = utils.disallowed_effects(entity),
-    type = utils.energy_type(entity),
-    fuelTypes = machine_fuel_types(entity),
-    usage = utils.usage(entity),
-    drain = utils.drain(entity),
+    usage = entity_usage(entity),
+    drain = entity_drain(entity),
+    burner = entity_burner(entity),
+    heat = entity_heat(entity),
     pollution = machine_pollution(entity),
+    fuelTypes = machine_fuel_types(entity),
+    neighborBonus = entity.neighbour_bonus and entity.neighbour_bonus * 100,
     silo = machine_silo(entity),
     size = utils.size(entity),
     baseEffect = machine_base_effect(entity),
-    entityType = entity.type,
     locations = utils.locations(entity),
     ingredientUsage = machine_ingredient_usage(entity)
   }
@@ -284,9 +333,19 @@ function entities.machine(entity, item)
       variant.modules = modules
     end
 
-    local usage = utils.usage(entity, name)
+    local usage = entity_usage(entity, name)
     if usage ~= machine.usage then
       variant.usage = usage
+    end
+
+    local burner = entity_burner(entity, name)
+    if burner ~= machine.burner then
+      variant.burner = burner
+    end
+
+    local heat = entity_heat(entity, name)
+    if heat ~= machine.heat then
+      variant.heat = heat
     end
 
     local pollution = machine_pollution(entity, name)
@@ -312,18 +371,58 @@ function entities.machine(entity, item)
 end
 
 function entities.cargo_wagon(entity)
-  return {
+  local wagon = {
     itemTypes = {"item"},
     capacity = entity.get_inventory_size(defines.inventory.cargo_wagon),
     capacityType = "stacks"
   }
+
+  local quality_record = {}
+  for name, quality in pairs(state.abnormal_qualities) do
+    local variant = {}
+
+    local capacity = entity.get_inventory_size(defines.inventory.cargo_wagon, name)
+    if capacity ~= wagon.capacity then
+      variant.capacity = capacity
+    end
+
+    if next(variant) ~= nil then
+      quality_record[name] = variant
+    end
+  end
+
+  if next(quality_record) ~= nil then
+    wagon.qualityRecord = quality_record
+  end
+
+  return wagon
 end
 
 function entities.fluid_wagon(entity)
-  return {
+  local wagon = {
     itemTypes = {"fluid"},
     capacity = entity.get_fluid_capacity()
   }
+
+  local quality_record = {}
+  for name, quality in pairs(state.abnormal_qualities) do
+    local variant = {}
+
+    local capacity = entity.get_fluid_capacity(name)
+    if capacity ~= wagon.capacity then
+      variant.capacity = capacity
+    end
+
+    if next(variant) ~= nil then
+      quality_record[name] = variant
+    end
+  end
+
+  if next(quality_record) ~= nil then
+    wagon.qualityRecord = quality_record
+  end
+
+  return wagon
 end
 
 function inserter_speed(entity, quality)
