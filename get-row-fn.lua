@@ -1,5 +1,5 @@
 return function()
-  local last_row, last_group, last_subgroup = 0
+  local last_row, last_group, last_subgroup = 0, nil, nil
   return function(obj)
     if obj.group == last_group then
       if obj.subgroup ~= last_subgroup then

@@ -21,7 +21,7 @@ function utils.size(entity)
     return {0, 0}
   end
 
-  local left, top, right, bottom = 0
+  local left, top, right, bottom = 0, 0, 0, 0
   if box[1] then
     left = box[1][1]
     top = box[1][2]
@@ -60,7 +60,7 @@ function utils.size(entity)
   return {tile_width, tile_height}
 end
 
-function eval_surface_conditions(location, conditions)
+local function eval_surface_conditions(location, conditions)
   for _, condition in ipairs(conditions) do
     local value =
       location.surface_properties and location.surface_properties[condition.property] or
@@ -107,7 +107,7 @@ function utils.is_crafting_machine(entity)
   return entity.type == "assembling-machine" or entity.type == "furnace" or entity.type == "rocket-silo"
 end
 
-function modules(entity, quality)
+local function modules(entity, quality)
   if quality and entity.quality_affects_module_slots then
     if quality.beacon_module_slots_bonus and entity.type == "beacon" then
       return entity.module_inventory_size + quality.beacon_module_slots_bonus

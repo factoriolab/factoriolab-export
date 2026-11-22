@@ -4,25 +4,31 @@ local utils = require("utils")
 
 local entities = {}
 
-function convert_energy(energy)
-  return energy and energy > 0 and energy / 1000 * 60 or nil
+local function convert_energy(energy)
+  return energy and energy ~= 0 and energy / 1000 * 60 or nil
 end
 
-function get_usage(entity, quality)
-  local usage = entity.get_max_energy_usage(quality)
-  return convert_energy(usage)
+local function get_usage(entity, quality)
+  if entity.type == "generator" then
+    local usage = entity.get_max_power_output(quality)
+    usage = usage and usage * -1
+    return convert_energy(usage)
+  else
+    local usage = entity.get_max_energy_usage(quality)
+    return convert_energy(usage)
+  end
 end
 
-function entity_usage(entity, quality)
+local function entity_usage(entity, quality)
   return entity.electric_energy_source_prototype and get_usage(entity, quality)
 end
 
-function entity_drain(entity)
+local function entity_drain(entity)
   local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
   return convert_energy(drain)
 end
 
-function entity_burner(entity, quality)
+local function entity_burner(entity, quality)
   if entity.type == "fusion-reactor" then
     local fluid
 
@@ -46,7 +52,7 @@ function entity_burner(entity, quality)
   return entity.burner_prototype and get_usage(entity, quality)
 end
 
-function entity_heat(entity, quality)
+local function entity_heat(entity, quality)
   return entity.heat_energy_source_prototype and get_usage(entity, quality)
 end
 
@@ -425,7 +431,7 @@ function entities.fluid_wagon(entity)
   return wagon
 end
 
-function inserter_speed(entity, quality)
+local function inserter_speed(entity, quality)
   local rotations_per_tick = entity.get_inserter_rotation_speed(quality)
   local ticks_per_rotation = math.max(math.floor(1 / rotations_per_tick / 2) * 2, 1)
   local rotations_per_sec = 1 / ticks_per_rotation * 60

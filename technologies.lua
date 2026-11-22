@@ -2,7 +2,7 @@ local state = require("state")
 
 local technologies = {}
 
-function prerequisites(technology)
+local function prerequisites(technology)
   local result = {}
 
   for name, prereq in pairs(technology.prerequisites) do

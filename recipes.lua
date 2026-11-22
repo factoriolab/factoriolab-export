@@ -75,32 +75,6 @@ function recipes.products(products)
   return result, catalyst, total
 end
 
-function recipes.save(recipe, localised_name, sprite, scale)
-  local recycling = false
-  if proto then
-    for _, category in ipairs(proto.categories) do
-      if category == "recycling" then
-        recycling = true
-      end
-    end
-  end
-
-  if not proto or recycling then
-    for id, _ in pairs(recipe["in"]) do
-      state.items_used[id] = true
-    end
-
-    for id, _ in pairs(recipe["out"]) do
-      state.items_used[id] = true
-    end
-  end
-
-  table.insert(
-    state.recipes_meta,
-    {recipe = recipe, localised_name = localised_name, sprite = sprite, scale = scale, proto = proto}
-  )
-end
-
 function recipes.store_used_items(recipe)
   for id, _ in pairs(recipe["in"]) do
     state.items_used[id] = true
