@@ -19,11 +19,11 @@ return function()
     local item = {
       id = id,
       icon = sprite,
-      types = {"item"},
+      types = { "item" },
       stack = proto.stack_size,
       rocketCapacity = proto.weight and proto.weight > 0 and
-        math.floor(prototypes.utility_constants.default_rocket_lift_weight / proto.weight) or
-        nil
+          math.floor(prototypes.utility_constants.default_rocket_lift_weight / proto.weight) or
+          nil
     }
 
     if proto.fuel_value > 0 then
@@ -36,7 +36,7 @@ return function()
       state.items_used[item.id] = true
     end
 
-    table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
+    table.insert(state.items_meta, { item = item, sprite = sprite, scale = 2, proto = proto })
     state.item_map[item.id] = item
     item_map[name] = item
   end
@@ -58,18 +58,19 @@ return function()
       local item = item_map[name] or entities.item(proto)
       item.belt = entities.pipe(proto)
       state.items_used[item.id] = true
-    elseif
-      proto.type == "assembling-machine" or proto.type == "boiler" or proto.type == "burner-generator" or
-        proto.type == "furnace" or
-        proto.type == "fusion-generator" or
-        proto.type == "fusion-reactor" or
-        proto.type == "generator" or
-        proto.type == "lab" or
-        proto.type == "mining-drill" or
-        proto.type == "offshore-pump" or
-        proto.type == "reactor" or
-        proto.type == "rocket-silo"
-     then
+    elseif proto.type == "assembling-machine"
+        or proto.type == "boiler"
+        or proto.type == "burner-generator"
+        or proto.type == "furnace"
+        or proto.type == "fusion-generator"
+        or proto.type == "fusion-reactor"
+        or proto.type == "generator"
+        or proto.type == "lab"
+        or proto.type == "mining-drill"
+        or proto.type == "offshore-pump"
+        or proto.type == "reactor"
+        or proto.type == "rocket-silo"
+    then
       local item = item_map[name] or entities.item(proto)
       local machine = entities.machine(proto, item)
       if machine then
@@ -100,10 +101,10 @@ return function()
     local item = {
       id = "fluid-" .. name,
       icon = sprite,
-      types = {"fluid"}
+      types = { "fluid" }
     }
 
-    table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = proto})
+    table.insert(state.items_meta, { item = item, sprite = sprite, scale = 2, proto = proto })
     state.item_map[item.id] = item
   end
 

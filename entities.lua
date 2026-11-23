@@ -9,7 +9,44 @@ local function convert_energy(energy)
 end
 
 local function get_usage(entity, quality)
-  if entity.type == "generator" then
+  if entity.type == "fusion-reactor" then
+    local fluid
+
+    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "output" then
+        fluid = fluidbox.filter
+        break
+      end
+    end
+
+    if fluid == nil then
+      return nil
+    end
+
+    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality)
+    local kj_energy = fluid.heat_capacity
+    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
+    return convert_energy(energy)
+  elseif entity.type == "fusion-generator" then
+    local fluid
+
+    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "input" then
+        fluid = fluidbox.filter
+        break
+      end
+    end
+
+    if fluid == nil then
+      return nil
+    end
+
+    state.player.print(fluid.name)
+    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality)
+    local kj_energy = fluid.heat_capacity
+    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
+    return convert_energy(energy)
+  elseif entity.type == "generator" then
     local usage = entity.get_max_power_output(quality)
     usage = usage and usage * -1
     return convert_energy(usage)
@@ -29,26 +66,6 @@ local function entity_drain(entity)
 end
 
 local function entity_burner(entity, quality)
-  if entity.type == "fusion-reactor" then
-    local fluid
-
-    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
-      if fluidbox.filter and fluidbox.production_type == "output" then
-        fluid = fluidbox.filter
-        break
-      end
-    end
-
-    if fluid == nil then
-      return nil
-    end
-
-    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality) * 60
-    local kj_energy = fluid.heat_capacity / 1000
-    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
-    return energy
-  end
-
   return entity.burner_prototype and get_usage(entity, quality)
 end
 
@@ -61,9 +78,9 @@ function entities.item(entity)
   local item = {
     id = "entity-" .. entity.name,
     icon = sprite,
-    types = {entity.type}
+    types = { entity.type }
   }
-  table.insert(state.items_meta, {item = item, sprite = sprite, scale = 2, proto = entity})
+  table.insert(state.items_meta, { item = item, sprite = sprite, scale = 2, proto = entity })
   state.item_map[item.id] = item
   return item
 end
@@ -118,13 +135,13 @@ function entities.beacon(entity)
 end
 
 function entities.belt(entity)
-  return {itemTypes = {"item"}, speed = entity.belt_speed * 8 * 60}
+  return { itemTypes = { "item" }, speed = entity.belt_speed * 8 * 60 }
 end
 
 function entities.pipe(entity)
   local speed_num = entity.get_pumping_speed()
   local pipe = {
-    itemTypes = {"fluid"},
+    itemTypes = { "fluid" },
     speed = speed_num * 60
   }
 
@@ -174,10 +191,17 @@ local function machine_speed(entity, quality)
     return entity.mining_speed or 1
   elseif entity.type == "offshore-pump" then
     return entity.get_pumping_speed(quality) * 60
-  elseif entity.type == "boiler" then
+  elseif entity.type == "boiler"
+      or entity.type == "generator"
+      or entity.type == "fusion-generator"
+      or entity.type == "reactor" then
     if quality then
       local base_usage = get_usage(entity)
       local quality_usage = get_usage(entity, quality)
+      if quality_usage == nil then
+        state.player.print(entity.name)
+        state.player.print(base_usage)
+      end
       return quality_usage / base_usage
     end
 
@@ -210,16 +234,11 @@ local function machine_fuel_types(entity)
   return fuel_types
 end
 
-local function pollution(energy_source, usage)
-  local result = energy_source.emissions_per_joule["pollution"] * usage * 60 * 60
-  return result > 0 and result or nil
-end
-
 local function machine_pollution(entity, quality)
   local energy_source =
-    entity.electric_energy_source_prototype or entity.burner_prototype or entity.heat_energy_source_prototype or
-    entity.fluid_energy_source_prototype or
-    entity.void_energy_source_prototype
+      entity.electric_energy_source_prototype or entity.burner_prototype or entity.heat_energy_source_prototype or
+      entity.fluid_energy_source_prototype or
+      entity.void_energy_source_prototype
   local usage = entity.get_max_energy_usage(quality)
   local result = energy_source.emissions_per_joule["pollution"] * usage * 60 * 60
   return result > 0 and result or nil
@@ -252,7 +271,7 @@ end
 local function add_producers(id, categories, type)
   for category, _ in pairs(categories) do
     if not state.producers[type][category] then
-      state.producers[type][category] = {id}
+      state.producers[type][category] = { id }
     else
       table.insert(state.producers[type][category], id)
     end
@@ -276,9 +295,9 @@ local function process_producers(entity, item)
   end
 
   if entity.type == "offshore-pump" then
-    state.machines.offshore_pump[entity.name] = {id = item.id, output = output_fluid(entity)}
+    state.machines.offshore_pump[entity.name] = { id = item.id, output = output_fluid(entity) }
   elseif entity.type == "boiler" then
-    state.machines.boiler[entity.name] = {id = item.id, output = output_fluid(entity), input = input_fluid(entity)}
+    state.machines.boiler[entity.name] = { id = item.id, output = output_fluid(entity), input = input_fluid(entity) }
   elseif entity.type == "rocket-silo" then
     -- TODO: Handle silos without fixed part recipes?
     if entity.fixed_recipe then
@@ -292,7 +311,7 @@ local function process_producers(entity, item)
       end
 
       if part then
-        state.machines.silo[entity.name] = {id = item.id, part = part, recipe_in = recipe_in}
+        state.machines.silo[entity.name] = { id = item.id, part = part, recipe_in = recipe_in }
       end
     end
   elseif entity.type == "lab" then
@@ -301,14 +320,14 @@ local function process_producers(entity, item)
 end
 
 function entities.machine(entity, item)
-  local speed = machine_speed(entity)
+  local base_speed = machine_speed(entity)
 
-  if speed == 0 then
+  if base_speed == 0 then
     return nil
   end
 
   local machine = {
-    speed = speed,
+    speed = base_speed,
     modules = utils.modules(entity),
     disallowedEffects = utils.disallowed_effects(entity),
     usage = entity_usage(entity),
@@ -378,7 +397,7 @@ end
 
 function entities.cargo_wagon(entity)
   local wagon = {
-    itemTypes = {"item"},
+    itemTypes = { "item" },
     capacity = entity.get_inventory_size(defines.inventory.cargo_wagon),
     capacityType = "stacks"
   }
@@ -406,7 +425,7 @@ end
 
 function entities.fluid_wagon(entity)
   local wagon = {
-    itemTypes = {"fluid"},
+    itemTypes = { "fluid" },
     capacity = entity.get_fluid_capacity()
   }
 
