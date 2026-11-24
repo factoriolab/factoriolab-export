@@ -60,7 +60,6 @@ return function()
       state.items_used[item.id] = true
     elseif proto.type == "assembling-machine"
         or proto.type == "boiler"
-        or proto.type == "burner-generator"
         or proto.type == "furnace"
         or proto.type == "fusion-generator"
         or proto.type == "fusion-reactor"

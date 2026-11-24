@@ -1,5 +1,6 @@
 local iterate_collection = require("iterate-collection")
 local process_categories = require("process-categories")
+local entities = require("entities")
 local recipes = require("recipes")
 local state = require("state")
 local utils = require("utils")
@@ -19,7 +20,7 @@ return function()
       local id = "item-" .. name
 
       for entity_name, info in pairs(state.machines.silo) do
-        local recipe_in = {[id] = 1}
+        local recipe_in = { [id] = 1 }
         for item_id, amount in pairs(info.recipe_in) do
           if not recipe_in[item_id] then
             recipe_in[item_id] = 0
@@ -36,7 +37,7 @@ return function()
           out = out,
           catalyst = catalyst,
           part = info.part,
-          producers = {info.id}
+          producers = { info.id }
         }
 
         recipes.store_used_items(recipe)
@@ -44,50 +45,8 @@ return function()
           state.recipes_meta,
           {
             recipe = recipe,
-            localised_name = {"factoriolab-export.launch-item", proto.localised_name},
+            localised_name = { "factoriolab-export.launch-item", proto.localised_name },
             proto = product_proto
-          }
-        )
-      end
-    end
-
-    if proto.burnt_result then
-      -- Burn recipes
-      local producer_map = {}
-      for _, fuel_category in ipairs(proto.fuel_categories) do
-        local category_producers = state.producers.burner[fuel_category]
-        if category_producers then
-          for _, producer in ipairs(category_producers) do
-            producer_map[producer] = true
-          end
-        end
-      end
-
-      local producers = {}
-      for producer, _ in pairs(producer_map) do
-        table.insert(producers, producer)
-      end
-
-      if #producers > 0 then
-        local item = state.item_map["item-" .. proto.burnt_result.name]
-
-        local recipe = {
-          id = "burn-" .. name,
-          icon = item.icon,
-          time = 1,
-          ["in"] = {["item-" .. name] = 0},
-          out = {[item.id] = 0},
-          producers = producers,
-          flags = {"burn"}
-        }
-
-        recipes.store_used_items(recipe)
-        table.insert(
-          state.recipes_meta,
-          {
-            recipe = recipe,
-            localised_name = {"factoriolab-export.x-from-y", proto.burnt_result.localised_name, proto.localised_name},
-            proto = proto.burnt_result
           }
         )
       end
@@ -100,8 +59,8 @@ return function()
         id = "spoil-" .. name,
         icon = item.icon,
         time = 1,
-        ["in"] = {["item-" .. name] = 1},
-        out = {[item.id] = 1}
+        ["in"] = { ["item-" .. name] = 1 },
+        out = { [item.id] = 1 }
       }
 
       recipes.store_used_items(recipe)
@@ -109,33 +68,33 @@ return function()
         state.recipes_meta,
         {
           recipe = recipe,
-          localised_name = {"factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name},
+          localised_name = { "factoriolab-export.x-from-y", proto.spoil_result.localised_name, proto.localised_name },
           proto = proto.spoil_result
         }
       )
     end
 
     if
-      proto.plant_result and proto.plant_result.mineable_properties.minable and
+        proto.plant_result and proto.plant_result.mineable_properties.minable and
         proto.plant_result.mineable_properties.products
-     then
+    then
       -- Agriculture recipes
       local product_proto = utils.first_product_proto(proto.plant_result.mineable_properties.products)
       local out, catalyst, total = recipes.products(proto.plant_result.mineable_properties.products)
       local first_out = next(out)
       local item = state.item_map[first_out]
       local sprite = "entity/" .. proto.plant_result.name
-      table.insert(state.icons, {sprite = sprite, scale = 2})
+      table.insert(state.icons, { sprite = sprite, scale = 2 })
       local recipe = {
         id = "harvest-" .. proto.plant_result.name,
         icon = sprite,
         time = proto.plant_result.growth_ticks / 60,
-        ["in"] = {["item-" .. name] = 1},
+        ["in"] = { ["item-" .. name] = 1 },
         out = out,
         catalyst = catalyst,
         cost = 100 / total,
         locations = utils.locations(proto.plant_result),
-        flags = {"showCount"}
+        flags = { "showCount" }
       }
 
       recipes.store_used_items(recipe)
@@ -143,7 +102,7 @@ return function()
         state.recipes_meta,
         {
           recipe = recipe,
-          localised_name = {"factoriolab-export.harvest-item", proto.plant_result.localised_name},
+          localised_name = { "factoriolab-export.harvest-item", proto.plant_result.localised_name },
           proto = product_proto
         }
       )
@@ -187,7 +146,7 @@ return function()
             catalyst = catalyst,
             producers = producers,
             cost = 100 / total,
-            flags = {"mining"},
+            flags = { "mining" },
             locations = locations
           }
 
@@ -200,12 +159,22 @@ return function()
             state.recipes_meta,
             {
               recipe = recipe,
-              localised_name = {"factoriolab-export.mining-item", proto.localised_name},
+              localised_name = { "factoriolab-export.mining-item", proto.localised_name },
               proto = product_proto
             }
           )
         end
       end
+    elseif proto.type == "reactor" then
+      state.player.print("reactor: " .. proto.name)
+    elseif proto.type == "fusion-reactor" then
+      -- This should likely be processed with the output fluid (plasma) for ideal placement
+      -- This is already how boil recipes work
+      state.player.print("fusion-reactor: " .. proto.name)
+    elseif proto.type == "fusion-generator" then
+      state.player.print("fusion-generator: " .. proto.name)
+    elseif proto.type == "generator" then
+      state.player.print("generator: " .. proto.name)
     end
   end
 
@@ -226,7 +195,7 @@ return function()
 
     if #locations > 0 then
       local producers = {}
-      for entity_name, info in pairs(state.machines.offshore_pump) do
+      for _, info in pairs(state.machines.offshore_pump) do
         if not info.output or info.output == name then
           table.insert(producers, info.id)
         end
@@ -238,7 +207,7 @@ return function()
           icon = item.icon,
           time = 1,
           ["in"] = {},
-          out = {[item.id] = 1},
+          out = { [item.id] = 1 },
           producers = producers,
           locations = locations
         }
@@ -248,7 +217,7 @@ return function()
           state.recipes_meta,
           {
             recipe = recipe,
-            localised_name = {"factoriolab-export.offshore-pump-item", proto.localised_name},
+            localised_name = { "factoriolab-export.offshore-pump-item", proto.localised_name },
             proto = proto
           }
         )
@@ -256,37 +225,38 @@ return function()
     end
 
     -- Boiler recipes
-    local input_producers = {}
-    for entity_name, info in pairs(state.machines.boiler) do
+    for boiler_name, info in pairs(state.machines.boiler) do
       if info.output == name and info.input then
-        if not input_producers[info.input] then
-          input_producers[info.input] = {}
-        end
+        local input_id = "fluid-" .. info.input
+        local boiler = prototypes.entity[boiler_name]
+        local input = prototypes.fluid[info.input]
+        local temp_diff = boiler.target_temperature - input.default_temperature
+        local input_joules = input.heat_capacity
+        local output_joules = proto.heat_capacity
+        local energy_reqd = temp_diff * input_joules / 1000
+        local output_fluid = input_joules / output_joules
+        local boiler_power = entities.get_usage(boiler)
+        local speed = boiler_power / energy_reqd
 
-        table.insert(input_producers[info.input], info.id)
-      end
-    end
-
-    for input, producers in pairs(input_producers) do
-      local input_id = "fluid-" .. input
-      local recipe = {
-        id = "boiler-" .. name,
-        icon = item.icon,
-        time = 1,
-        ["in"] = {[input_id] = 1},
-        out = {[item.id] = 10},
-        producers = producers
-      }
-
-      recipes.store_used_items(recipe)
-      table.insert(
-        state.recipes_meta,
-        {
-          recipe = recipe,
-          localised_name = {"factoriolab-export.boil-item", prototypes.fluid[input].localised_name},
-          proto = proto
+        local recipe = {
+          id = boiler_name .. "-" .. name .. "-boil",
+          icon = item.icon,
+          time = 1,
+          ["in"] = { [input_id] = speed },
+          out = { [item.id] = output_fluid * speed },
+          producers = { info.id }
         }
-      )
+
+        recipes.store_used_items(recipe)
+        table.insert(
+          state.recipes_meta,
+          {
+            recipe = recipe,
+            localised_name = { "factoriolab-export.x-from-y-in", prototypes.fluid[name].localised_name, prototypes.fluid[info.input].localised_name, prototypes.entity[boiler_name].localised_name },
+            proto = proto
+          }
+        )
+      end
     end
   end
 
@@ -299,7 +269,7 @@ return function()
     local out, catalyst = recipes.products(proto.products)
 
     local producer_map = {}
-    function add_category(category)
+    local function add_category(category)
       local producers = state.producers.crafting[category]
       if not producers then
         return
@@ -353,7 +323,7 @@ return function()
       recipe.flags = flags
     end
 
-    table.insert(state.recipes_meta, {recipe = recipe, sprite = sprite, scale = 2, proto = proto})
+    table.insert(state.recipes_meta, { recipe = recipe, sprite = sprite, scale = 2, proto = proto })
 
     local forceRecipe = state.player.force.recipes[name]
     if (forceRecipe and forceRecipe.productivity_bonus > 0) then

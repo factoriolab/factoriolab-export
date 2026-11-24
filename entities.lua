@@ -8,7 +8,45 @@ local function convert_energy(energy)
   return energy and energy ~= 0 and energy / 1000 * 60 or nil
 end
 
-local function get_usage(entity, quality)
+function entities.get_usage(entity, quality)
+  if entity.type == "fusion-generator" then
+    local fluid
+
+    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
+      if fluidbox.filter and fluidbox.production_type == "input" then
+        fluid = fluidbox.filter
+        break
+      end
+    end
+
+    if fluid == nil then
+      return nil
+    end
+
+    local fluid_per_tick = entity.get_fluid_usage_per_tick(quality)
+    local joules = fluid.heat_capacity
+    local energy = fluid_per_tick * fluid.default_temperature * joules
+    return convert_energy(energy)
+  elseif entity.type == "generator" then
+    local usage = entity.get_max_power_output(quality)
+    usage = usage and usage * -1
+    return convert_energy(usage)
+  else
+    local usage = entity.get_max_energy_usage(quality)
+    return convert_energy(usage)
+  end
+end
+
+local function entity_usage(entity, quality)
+  return entity.electric_energy_source_prototype and entities.get_usage(entity, quality)
+end
+
+local function entity_drain(entity)
+  local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
+  return convert_energy(drain)
+end
+
+local function entity_burner(entity, quality)
   if entity.type == "fusion-reactor" then
     local fluid
 
@@ -23,54 +61,17 @@ local function get_usage(entity, quality)
       return nil
     end
 
-    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality)
-    local kj_energy = fluid.heat_capacity
-    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
+    local fluid_per_tick = entity.get_fluid_usage_per_tick(quality)
+    local joules = fluid.heat_capacity
+    local energy = fluid_per_tick * fluid.default_temperature * joules
     return convert_energy(energy)
-  elseif entity.type == "fusion-generator" then
-    local fluid
-
-    for _, fluidbox in ipairs(entity.fluidbox_prototypes) do
-      if fluidbox.filter and fluidbox.production_type == "input" then
-        fluid = fluidbox.filter
-        break
-      end
-    end
-
-    if fluid == nil then
-      return nil
-    end
-
-    state.player.print(fluid.name)
-    local fluid_per_sec = entity.get_fluid_usage_per_tick(quality)
-    local kj_energy = fluid.heat_capacity
-    local energy = fluid_per_sec * fluid.default_temperature * kj_energy
-    return convert_energy(energy)
-  elseif entity.type == "generator" then
-    local usage = entity.get_max_power_output(quality)
-    usage = usage and usage * -1
-    return convert_energy(usage)
-  else
-    local usage = entity.get_max_energy_usage(quality)
-    return convert_energy(usage)
   end
-end
 
-local function entity_usage(entity, quality)
-  return entity.electric_energy_source_prototype and get_usage(entity, quality)
-end
-
-local function entity_drain(entity)
-  local drain = entity.electric_energy_source_prototype and entity.electric_energy_source_prototype.drain
-  return convert_energy(drain)
-end
-
-local function entity_burner(entity, quality)
-  return entity.burner_prototype and get_usage(entity, quality)
+  return entity.burner_prototype and entities.get_usage(entity, quality) / entity.burner_prototype.effectivity
 end
 
 local function entity_heat(entity, quality)
-  return entity.heat_energy_source_prototype and get_usage(entity, quality)
+  return entity.heat_energy_source_prototype and entities.get_usage(entity, quality)
 end
 
 function entities.item(entity)
@@ -196,12 +197,8 @@ local function machine_speed(entity, quality)
       or entity.type == "fusion-generator"
       or entity.type == "reactor" then
     if quality then
-      local base_usage = get_usage(entity)
-      local quality_usage = get_usage(entity, quality)
-      if quality_usage == nil then
-        state.player.print(entity.name)
-        state.player.print(base_usage)
-      end
+      local base_usage = entities.get_usage(entity)
+      local quality_usage = entities.get_usage(entity, quality)
       return quality_usage / base_usage
     end
 
@@ -256,6 +253,12 @@ local function machine_silo(entity)
 end
 
 local function machine_base_effect(entity)
+  if entity.type == "reactor" then
+    if entity.burner_prototype and entity.burner_prototype.effectivity ~= 1 then
+      return { productivity = entity.burner_prototype.effectivity - 1 }
+    end
+  end
+
   return entity.effect_receiver and entity.effect_receiver.base_effect or nil
 end
 

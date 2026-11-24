@@ -2,6 +2,14 @@ local state = require("state")
 
 local items = {}
 
+function items.add_temp(name, temp)
+  if not state.fluid_temps[name] then
+    state.fluid_temps[name] = { [temp] = true }
+  else
+    state.fluid_temps[name][temp] = true
+  end
+end
+
 function items.fuel(item)
   return {
     types = item.fuel_categories,

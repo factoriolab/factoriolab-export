@@ -36,6 +36,8 @@ state.items_meta = {}
 state.items_used = {}
 -- Items removed because they are not needed in the final data. Record<string, true>
 state.items_removed = {}
+-- Temperatures found for fluids. Record<string, Record<number, true>>
+state.fluid_temps = {}
 -- Meta recipes. { recipe: Recipe, sprite: string, scale: number, localised_string: string, proto: Entity }[]
 state.recipes_meta = {}
 -- Recipes that can be enabled in this data set. Record<string, true>
